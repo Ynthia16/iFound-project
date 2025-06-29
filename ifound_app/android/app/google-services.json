@@ -1,0 +1,82 @@
+{
+  "project_info": {
+    "project_number": "845305339516",
+    "project_id": "ifound-mobileapp-52771",
+    "storage_bucket": "ifound-mobileapp-52771.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:845305339516:android:88c83073a58c5debb2b3f9",
+        "android_client_info": {
+          "package_name": "com.example.ifound_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "845305339516-9dejk172cf69cemhfuh5010mnhbf8ucb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBlRWQ81YujhTLpVPXxy034HQjnL4JU3sM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "845305339516-9dejk172cf69cemhfuh5010mnhbf8ucb.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "845305339516-6f1176mngj775ge4vu489qiuj1rsqi5m.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.ifoundApp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:845305339516:android:b63562a6b703fe1ab2b3f9",
+        "android_client_info": {
+          "package_name": "com.ifound.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "845305339516-9dejk172cf69cemhfuh5010mnhbf8ucb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBlRWQ81YujhTLpVPXxy034HQjnL4JU3sM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "845305339516-9dejk172cf69cemhfuh5010mnhbf8ucb.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "845305339516-6f1176mngj775ge4vu489qiuj1rsqi5m.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.ifoundApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
