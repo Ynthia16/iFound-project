@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../components/ifound_appbar.dart';
 import '../components/ifound_background.dart';
+import '../utils/responsive_helper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
@@ -413,6 +414,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _logout() async {
+    final navigator = Navigator.of(context);
     final shouldLogout = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -421,11 +423,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
+            onPressed: () => navigator.pop(false),
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
+            onPressed: () => navigator.pop(true),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red[600],
               foregroundColor: Colors.white,
@@ -438,7 +440,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (shouldLogout == true && mounted) {
       await FirebaseAuth.instance.signOut();
-      Navigator.of(context).popUntil((route) => route.isFirst);
+      navigator.popUntil((route) => route.isFirst);
     }
   }
 
@@ -449,32 +451,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.dispose();
   }
 
-  Widget _buildProfileImage() {
+  Widget _buildProfileImage(bool isSmallScreen) {
     if (_profileImageUrl != null) {
       return CircleAvatar(
-        radius: 50,
+        radius: isSmallScreen ? 40 : 50,
         backgroundColor: const Color(0xFF2196F3),
         backgroundImage: NetworkImage(_profileImageUrl!),
       );
     } else if (_selectedAvatar != null) {
       return CircleAvatar(
-        radius: 50,
+        radius: isSmallScreen ? 40 : 50,
         backgroundColor: const Color(0xFF2196F3),
         child: Text(
           _selectedAvatar!,
-          style: const TextStyle(fontSize: 32),
+          style: TextStyle(fontSize: isSmallScreen ? 24 : 32),
         ),
       );
     } else {
       return CircleAvatar(
-        radius: 50,
+        radius: isSmallScreen ? 40 : 50,
         backgroundColor: const Color(0xFF2196F3),
         child: Text(
           _getDisplayName(FirebaseAuth.instance.currentUser).isNotEmpty
               ? _getDisplayName(FirebaseAuth.instance.currentUser)[0].toUpperCase()
               : 'U',
           style: GoogleFonts.poppins(
-            fontSize: 32,
+            fontSize: isSmallScreen ? 24 : 32,
             color: Colors.white,
             fontWeight: FontWeight.bold
           ),
@@ -486,8 +488,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final isDark = themeProvider.themeMode == ThemeMode.dark;
+    final isDark = Provider.of<ThemeProvider>(context).themeMode == ThemeMode.dark;
+    final isSmallScreen = ResponsiveHelper.isSmallScreen(context);
+    
+    // Responsive sizing
+    final padding = isSmallScreen ? 12.0 : 20.0;
+    final cardPadding = isSmallScreen ? 16.0 : 24.0;
+    final nameFontSize = isSmallScreen ? 20.0 : 24.0;
+    final emailFontSize = isSmallScreen ? 14.0 : 16.0;
+    final memberFontSize = isSmallScreen ? 10.0 : 12.0;
+    final cameraIconSize = isSmallScreen ? 16.0 : 20.0;
+    final cameraPadding = isSmallScreen ? 6.0 : 8.0;
 
     return IFoundBackground(
       child: Scaffold(
@@ -499,27 +510,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
             if (!_isEditing)
               IconButton(
                 onPressed: () => setState(() => _isEditing = true),
-                icon: const Icon(Icons.edit_rounded),
+                icon: Icon(Icons.edit_rounded, size: isSmallScreen ? 20 : 24),
                 tooltip: 'Edit Profile',
               ),
           ],
         ),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(padding),
           child: Column(
             children: [
               // Profile Header
               Card(
                 elevation: 4,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  children: [
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(isSmallScreen ? 16 : 20)),
+                child: Padding(
+                  padding: EdgeInsets.all(cardPadding),
+                  child: Column(
+                    children: [
                       // Profile Picture/Avatar
-                    Stack(
-                      children: [
-                          _buildProfileImage(),
+                      Stack(
+                        children: [
+                          _buildProfileImage(isSmallScreen),
                           if (_isUploadingImage)
                             Positioned.fill(
                               child: Container(
@@ -534,63 +545,63 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                 ),
                               ),
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: GestureDetector(
+                            ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: GestureDetector(
                               onTap: _isUploadingImage ? null : _showAvatarSelectionDialog,
                               child: Container(
-                                padding: const EdgeInsets.all(8),
+                                padding: EdgeInsets.all(cameraPadding),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFF2196F3),
                                   shape: BoxShape.circle,
                                   border: Border.all(color: Colors.white, width: 2),
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.camera_alt_rounded,
                                   color: Colors.white,
-                                  size: 20
+                                  size: cameraIconSize
                                 ),
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
+                        ],
+                      ),
+                      SizedBox(height: isSmallScreen ? 12 : 16),
 
                       // User Info
                       Text(
                         _getDisplayName(user),
                         style: GoogleFonts.poppins(
-                          fontSize: 24,
+                          fontSize: nameFontSize,
                           fontWeight: FontWeight.bold,
                           color: isDark ? Colors.white : const Color(0xFF1A1A1A),
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: isSmallScreen ? 2 : 4),
                       Text(
                         user?.email ?? '',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: emailFontSize,
                           color: isDark ? Colors.white70 : Colors.grey[600],
                         ),
                       ),
                       if (user?.metadata.creationTime != null) ...[
-                        const SizedBox(height: 8),
+                        SizedBox(height: isSmallScreen ? 4 : 8),
                         Text(
                           'Member since ${user!.metadata.creationTime!.toLocal().toString().split(" ").first}',
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: memberFontSize,
                             color: isDark ? Colors.white54 : Colors.grey[500],
                           ),
-                                ),
+                        ),
                       ],
                     ],
-                        ),
-                      ),
+                  ),
+                ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: isSmallScreen ? 16 : 20),
 
               // Profile Form
               if (_isEditing) ...[

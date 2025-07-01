@@ -3,15 +3,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../components/ifound_drawer.dart';
 import '../components/ifound_navbar.dart';
-import '../components/ifound_logo.dart';
 import 'home_screen.dart';
 import 'report_lost_screen.dart';
 import 'report_found_screen.dart';
 import 'feedback_screen.dart';
 import 'settings_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:provider/provider.dart';
-import '../providers/theme_provider.dart';
+import '../utils/responsive_helper.dart';
 
 /// Main navigation shell with bottom navigation bar.
 class MainShell extends StatefulWidget {
@@ -25,7 +23,8 @@ class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
   int _notificationCount = 0;
   List<Map<String, dynamic>> _userMatches = [];
-  
+  bool _isLoading = true;
+
   // Cache the screens to prevent recreation
   late final List<Widget> _screens;
 
@@ -33,6 +32,7 @@ class _MainShellState extends State<MainShell> {
   void initState() {
     super.initState();
     _initializeScreens();
+    _loadUserData();
   }
 
   void _initializeScreens() {
@@ -46,6 +46,34 @@ class _MainShellState extends State<MainShell> {
       const ReportFoundScreen(),
       const FeedbackScreen(),
     ];
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        // Pre-load user data to ensure smooth navigation
+        await Future.delayed(const Duration(milliseconds: 100));
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      // Error loading user data: $e
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   void goToTab(int index) {
@@ -78,13 +106,34 @@ class _MainShellState extends State<MainShell> {
   }
 
   void _showNotifications(BuildContext context) {
+    final isSmallScreen = ResponsiveHelper.isSmallScreen(context);
+    
+    // Responsive sizing
+    final modalHeight = isSmallScreen ? 0.9 : 0.85;
+    final headerPadding = isSmallScreen ? 16.0 : 24.0;
+    final contentPadding = isSmallScreen ? 12.0 : 20.0;
+    final iconSize = isSmallScreen ? 20.0 : 26.0;
+    final titleFontSize = isSmallScreen ? 20.0 : 24.0;
+    final closeIconSize = isSmallScreen ? 20.0 : 26.0;
+    final closeButtonSize = isSmallScreen ? 44.0 : 52.0;
+    final itemPadding = isSmallScreen ? 12.0 : 20.0;
+    final itemMargin = isSmallScreen ? 8.0 : 16.0;
+    final itemIconSize = isSmallScreen ? 20.0 : 26.0;
+    final itemTitleFontSize = isSmallScreen ? 16.0 : 18.0;
+    final itemSubtitleFontSize = isSmallScreen ? 13.0 : 15.0;
+    final emptyIconSize = isSmallScreen ? 60.0 : 80.0;
+    final emptyTitleFontSize = isSmallScreen ? 18.0 : 22.0;
+    final emptySubtitleFontSize = isSmallScreen ? 14.0 : 16.0;
+    final buttonPadding = isSmallScreen ? 14.0 : 18.0;
+    final buttonFontSize = isSmallScreen ? 14.0 : 16.0;
+
     // Show a more detailed notification modal with actual match data
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.85,
+        height: MediaQuery.of(context).size.height * modalHeight,
         decoration: BoxDecoration(
           color: Theme.of(context).scaffoldBackgroundColor,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
@@ -93,7 +142,7 @@ class _MainShellState extends State<MainShell> {
           children: [
             // Header
             Container(
-              padding: const EdgeInsets.all(24),
+              padding: EdgeInsets.all(headerPadding),
               decoration: BoxDecoration(
                 color: const Color(0xFF2196F3).withOpacity(0.1),
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
@@ -101,23 +150,23 @@ class _MainShellState extends State<MainShell> {
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(14),
+                    padding: EdgeInsets.all(isSmallScreen ? 10 : 14),
                     decoration: BoxDecoration(
                       color: const Color(0xFF2196F3).withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(18),
+                      borderRadius: BorderRadius.circular(isSmallScreen ? 14 : 18),
                     ),
-                    child: const Icon(
-                      Icons.notifications_active, 
-                      color: Color(0xFF2196F3),
-                      size: 26,
+                    child: Icon(
+                      Icons.notifications_active,
+                      color: const Color(0xFF2196F3),
+                      size: iconSize,
                     ),
                   ),
-                  const SizedBox(width: 18),
+                  SizedBox(width: isSmallScreen ? 12 : 18),
                   Expanded(
                     child: Text(
                       'Match Notifications'.tr(),
                       style: GoogleFonts.poppins(
-                        fontSize: 24,
+                        fontSize: titleFontSize,
                         fontWeight: FontWeight.w600,
                         color: const Color(0xFF2196F3),
                       ),
@@ -126,15 +175,15 @@ class _MainShellState extends State<MainShell> {
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.grey.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(isSmallScreen ? 12 : 16),
                     ),
                     child: IconButton(
                       onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close, size: 26),
-                      padding: const EdgeInsets.all(12),
-                      constraints: const BoxConstraints(
-                        minWidth: 52,
-                        minHeight: 52,
+                      icon: Icon(Icons.close, size: closeIconSize),
+                      padding: EdgeInsets.all(isSmallScreen ? 8 : 12),
+                      constraints: BoxConstraints(
+                        minWidth: closeButtonSize,
+                        minHeight: closeButtonSize,
                       ),
                     ),
                   ),
@@ -145,15 +194,15 @@ class _MainShellState extends State<MainShell> {
             Expanded(
               child: _userMatches.isNotEmpty
                   ? ListView.builder(
-                      padding: const EdgeInsets.all(20),
+                      padding: EdgeInsets.all(contentPadding),
                       itemCount: _userMatches.length,
                       itemBuilder: (context, index) {
                         final match = _userMatches[index];
                         return Container(
-                          margin: const EdgeInsets.only(bottom: 16),
+                          margin: EdgeInsets.only(bottom: itemMargin),
                           decoration: BoxDecoration(
                             color: Theme.of(context).cardColor,
-                            borderRadius: BorderRadius.circular(18),
+                            borderRadius: BorderRadius.circular(isSmallScreen ? 14 : 18),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.08),
@@ -163,57 +212,60 @@ class _MainShellState extends State<MainShell> {
                             ],
                           ),
                           child: ListTile(
-                            contentPadding: const EdgeInsets.all(20),
+                            contentPadding: EdgeInsets.all(itemPadding),
                             leading: Container(
-                              padding: const EdgeInsets.all(12),
+                              padding: EdgeInsets.all(isSmallScreen ? 8 : 12),
                               decoration: BoxDecoration(
                                 color: const Color(0xFF2196F3).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(16),
+                                borderRadius: BorderRadius.circular(isSmallScreen ? 12 : 16),
                               ),
-                              child: const Icon(
-                                Icons.description, 
-                                color: Color(0xFF2196F3),
-                                size: 26,
+                              child: Icon(
+                                Icons.description,
+                                color: const Color(0xFF2196F3),
+                                size: itemIconSize,
                               ),
                             ),
                             title: Text(
                               match['name'] ?? 'Unknown Document',
                               style: GoogleFonts.poppins(
                                 fontWeight: FontWeight.w600,
-                                fontSize: 18,
+                                fontSize: itemTitleFontSize,
                               ),
                             ),
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const SizedBox(height: 6),
+                                SizedBox(height: isSmallScreen ? 4 : 6),
                                 Text(
                                   '${match['docType'] ?? 'Document'} - ${match['sector'] ?? 'Unknown Sector'}',
                                   style: GoogleFonts.poppins(
-                                    fontSize: 15,
+                                    fontSize: itemSubtitleFontSize,
                                     color: Colors.grey[600],
                                   ),
                                 ),
-                                const SizedBox(height: 4),
+                                SizedBox(height: isSmallScreen ? 2 : 4),
                                 Text(
                                   'Status: ${match['status'] ?? 'Unknown'}',
                                   style: GoogleFonts.poppins(
-                                    color: (match['status'] == 'found') 
-                                        ? Colors.green 
+                                    color: (match['status'] == 'found')
+                                        ? Colors.green
                                         : Colors.orange,
                                     fontWeight: FontWeight.w600,
-                                    fontSize: 15,
+                                    fontSize: itemSubtitleFontSize,
                                   ),
                                 ),
                               ],
                             ),
                             trailing: Container(
-                              padding: const EdgeInsets.all(8),
+                              padding: EdgeInsets.all(isSmallScreen ? 6 : 8),
                               decoration: BoxDecoration(
                                 color: Colors.grey.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(isSmallScreen ? 8 : 12),
                               ),
-                              child: const Icon(Icons.arrow_forward_ios, size: 20),
+                              child: Icon(
+                                Icons.arrow_forward_ios, 
+                                size: isSmallScreen ? 16 : 20
+                              ),
                             ),
                             onTap: () {
                               Navigator.pop(context);
@@ -228,34 +280,37 @@ class _MainShellState extends State<MainShell> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Container(
-                            padding: const EdgeInsets.all(24),
+                            padding: EdgeInsets.all(isSmallScreen ? 16 : 24),
                             decoration: BoxDecoration(
                               color: Colors.grey.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(24),
+                              borderRadius: BorderRadius.circular(isSmallScreen ? 18 : 24),
                             ),
                             child: Icon(
                               Icons.notifications_none,
-                              size: 80,
+                              size: emptyIconSize,
                               color: Colors.grey[400],
                             ),
                           ),
-                          const SizedBox(height: 28),
+                          SizedBox(height: isSmallScreen ? 20 : 28),
                           Text(
                             'No matches found yet'.tr(),
                             style: GoogleFonts.poppins(
-                              fontSize: 22,
+                              fontSize: emptyTitleFontSize,
                               color: Colors.grey,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'You\'ll see notifications here when matches are found.'.tr(),
-                            style: GoogleFonts.poppins(
-                              fontSize: 16,
-                              color: Colors.grey,
+                          SizedBox(height: isSmallScreen ? 12 : 16),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 20 : 0),
+                            child: Text(
+                              'You\'ll see notifications here when matches are found.'.tr(),
+                              style: GoogleFonts.poppins(
+                                fontSize: emptySubtitleFontSize,
+                                color: Colors.grey,
+                              ),
+                              textAlign: TextAlign.center,
                             ),
-                            textAlign: TextAlign.center,
                           ),
                         ],
                       ),
@@ -263,7 +318,7 @@ class _MainShellState extends State<MainShell> {
             ),
             if (_userMatches.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.all(20),
+                padding: EdgeInsets.all(contentPadding),
                 child: Row(
                   children: [
                     Expanded(
@@ -278,16 +333,16 @@ class _MainShellState extends State<MainShell> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red[50],
                           foregroundColor: Colors.red[700],
-                          padding: const EdgeInsets.symmetric(vertical: 18),
+                          padding: EdgeInsets.symmetric(vertical: buttonPadding),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18),
+                            borderRadius: BorderRadius.circular(isSmallScreen ? 14 : 18),
                           ),
                           elevation: 0,
                         ),
                         child: Text(
                           'Clear All'.tr(),
                           style: GoogleFonts.poppins(
-                            fontSize: 16, 
+                            fontSize: buttonFontSize,
                             fontWeight: FontWeight.w600
                           ),
                         ),
@@ -307,149 +362,124 @@ class _MainShellState extends State<MainShell> {
     final user = FirebaseAuth.instance.currentUser;
     final displayName = _getDisplayName(user);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
+    // Show loading screen while initializing
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2196F3)),
+                strokeWidth: 3,
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Loading your dashboard...'.tr(),
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  color: isDark ? Colors.white70 : Colors.grey[600],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: _currentIndex == 0 ? AppBar(
-        automaticallyImplyLeading: true,
+      appBar: AppBar(
         title: Row(
           children: [
-            IFoundLogo(size: 36),
-            const SizedBox(width: 18),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2196F3).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.search_rounded,
+                color: Color(0xFF2196F3),
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Welcome back,',
+                    'iFound',
                     style: GoogleFonts.poppins(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: isDark ? Colors.white70 : Colors.grey[600],
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: isDark ? Colors.white : const Color(0xFF1A1A1A),
                     ),
                   ),
                   Text(
-                    displayName,
+                    'Welcome, ${displayName.split(' ').first}',
                     style: GoogleFonts.poppins(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white : const Color(0xFF1A1A1A),
+                      fontSize: 12,
+                      color: isDark ? Colors.white70 : Colors.grey[600],
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
             ),
           ],
         ),
-        backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-        elevation: isDark ? 0 : 1,
-        shadowColor: isDark ? Colors.transparent : Colors.black12,
+        backgroundColor: isDark ? const Color(0xFF181A20) : Colors.white,
+        elevation: 0,
+        shadowColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
         iconTheme: IconThemeData(
           color: isDark ? Colors.white : const Color(0xFF1A1A1A),
-          size: 26,
+          size: 24,
         ),
         actions: [
-          // Notifications
+          // Notification bell with badge
           Stack(
             children: [
-              Container(
-                margin: const EdgeInsets.only(right: 12),
-                decoration: BoxDecoration(
-                  color: isDark 
-                    ? const Color(0xFF2A2A2A) 
-                    : const Color(0xFFF5F5F5),
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(
-                    color: isDark 
-                      ? const Color(0xFF404040)
-                      : Colors.grey[300]!,
-                    width: 1,
-                  ),
-                ),
-                child: IconButton(
-                  icon: Icon(
-                    Icons.notifications_rounded, 
-                    color: isDark ? Colors.white70 : const Color(0xFF2196F3),
-                    size: 26,
-                  ),
-                  onPressed: () => _showNotifications(context),
-                  tooltip: 'Notifications',
-                  padding: const EdgeInsets.all(14),
-                  constraints: const BoxConstraints(
-                    minWidth: 52,
-                    minHeight: 52,
-                  ),
-                ),
+              IconButton(
+                onPressed: () => _showNotifications(context),
+                icon: const Icon(Icons.notifications_outlined),
+                tooltip: 'Notifications',
               ),
               if (_notificationCount > 0)
                 Positioned(
-                  right: 18,
-                  top: 14,
+                  right: 8,
+                  top: 8,
                   child: Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
                       color: Colors.red,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-                        width: 2,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.red.withOpacity(0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 16,
+                      minHeight: 16,
                     ),
                     child: Text(
-                      _notificationCount.toString(),
+                      _notificationCount > 9 ? '9+' : _notificationCount.toString(),
                       style: GoogleFonts.poppins(
-                        color: Colors.white, 
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
                       ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 ),
             ],
           ),
-          // Theme toggle
-          Container(
-            margin: const EdgeInsets.only(right: 12),
-            decoration: BoxDecoration(
-              color: isDark 
-                ? const Color(0xFF2A2A2A) 
-                : const Color(0xFFF5F5F5),
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(
-                color: isDark 
-                  ? const Color(0xFF404040)
-                  : Colors.grey[300]!,
-                width: 1,
-              ),
-            ),
-            child: IconButton(
-              icon: Icon(
-                isDark ? Icons.wb_sunny_rounded : Icons.nightlight_round, 
-                color: isDark ? Colors.amber : const Color(0xFF2196F3),
-                size: 26,
-              ),
-              onPressed: () => Provider.of<ThemeProvider>(context, listen: false).toggleTheme(),
-              tooltip: isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode',
-              padding: const EdgeInsets.all(14),
-              constraints: const BoxConstraints(
-                minWidth: 52,
-                minHeight: 52,
-              ),
-            ),
-          ),
+          const SizedBox(width: 8),
         ],
-      ) : null,
-      drawer: _currentIndex == 0 ? IFoundDrawer(
+      ),
+      drawer: IFoundDrawer(
         userName: displayName,
         avatarAsset: null,
         onFeedback: () {
@@ -462,7 +492,7 @@ class _MainShellState extends State<MainShell> {
           Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const SettingsScreen()));
         },
-      ) : null,
+      ),
       body: SafeArea(
         child: IndexedStack(
           index: _currentIndex,

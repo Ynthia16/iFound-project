@@ -18,7 +18,6 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   String _language = 'en';
   bool _pushNotifications = true;
-  bool _showNameOnPosts = false;
   bool _emailNotifications = true;
   bool _locationSharing = false;
   bool _dataAnalytics = true;
@@ -36,7 +35,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final prefs = await SharedPreferences.getInstance();
     final savedLocale = prefs.getString('selected_locale') ?? 'en';
     final pushNotifs = prefs.getBool('push_notifications') ?? true;
-    final showName = prefs.getBool('show_name_on_posts') ?? false;
     final emailNotifs = prefs.getBool('email_notifications') ?? true;
     final locationShare = prefs.getBool('location_sharing') ?? false;
     final analytics = prefs.getBool('data_analytics') ?? true;
@@ -46,7 +44,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() {
       _language = savedLocale;
       _pushNotifications = pushNotifs;
-      _showNameOnPosts = showName;
       _emailNotifications = emailNotifs;
       _locationSharing = locationShare;
       _dataAnalytics = analytics;
@@ -71,7 +68,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _language = languageCode;
     });
 
-    context.setLocale(Locale(languageCode));
+    if (mounted) {
+      context.setLocale(Locale(languageCode));
+    }
   }
 
   String _getLanguageName(String code) {
@@ -203,90 +202,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _showSecurityDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Security Settings'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SwitchListTile(
-              value: _biometricAuth,
-              onChanged: (value) async {
-                setState(() => _biometricAuth = value);
-                await _saveSetting('biometric_auth', value);
-                Navigator.of(context).pop();
-              },
-              title: const Text('Biometric Authentication'),
-              subtitle: const Text('Use fingerprint or face ID'),
-              secondary: const Icon(Icons.fingerprint_rounded),
-            ),
-            SwitchListTile(
-              value: _twoFactorAuth,
-              onChanged: (value) async {
-                setState(() => _twoFactorAuth = value);
-                await _saveSetting('two_factor_auth', value);
-                Navigator.of(context).pop();
-              },
-              title: const Text('Two-Factor Authentication'),
-              subtitle: const Text('Add extra security layer'),
-              secondary: const Icon(Icons.security_rounded),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showPrivacyDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Privacy Settings'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SwitchListTile(
-              value: _locationSharing,
-              onChanged: (value) async {
-                setState(() => _locationSharing = value);
-                await _saveSetting('location_sharing', value);
-                Navigator.of(context).pop();
-              },
-              title: const Text('Location Sharing'),
-              subtitle: const Text('Share your location in reports'),
-              secondary: const Icon(Icons.location_on_rounded),
-            ),
-            SwitchListTile(
-              value: _dataAnalytics,
-              onChanged: (value) async {
-                setState(() => _dataAnalytics = value);
-                await _saveSetting('data_analytics', value);
-                Navigator.of(context).pop();
-              },
-              title: const Text('Data Analytics'),
-              subtitle: const Text('Help improve the app'),
-              secondary: const Icon(Icons.analytics_rounded),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showPrivacyAndSafetyDialog() {
     showDialog(
       context: context,
@@ -305,71 +220,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _showAccessibilityDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Accessibility Settings'.tr()),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SwitchListTile(
-              value: false, // TODO: Add accessibility settings
-              onChanged: (value) {
-                // TODO: Implement accessibility features
-              },
-              title: Text('High Contrast Mode'.tr()),
-              subtitle: Text('Use high contrast colors'.tr()),
-              secondary: const Icon(Icons.contrast_rounded),
-            ),
-            SwitchListTile(
-              value: false, // TODO: Add accessibility settings
-              onChanged: (value) {
-                // TODO: Implement accessibility features
-              },
-              title: Text('Large Text'.tr()),
-              subtitle: Text('Make text larger'.tr()),
-              secondary: const Icon(Icons.text_fields_rounded),
-            ),
-            SwitchListTile(
-              value: false, // TODO: Add accessibility settings
-              onChanged: (value) {
-                // TODO: Implement accessibility features
-              },
-              title: Text('Screen Reader Support'.tr()),
-              subtitle: Text('Support screen readers'.tr()),
-              secondary: const Icon(Icons.hearing_rounded),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text('Close'.tr()),
-          ),
-        ],
-      ),
-    );
-  }
-
   Future<void> _exportData() async {
     setState(() => _isLoading = true);
 
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        // Export user data logic here
-        await Future.delayed(const Duration(seconds: 2)); // Simulate export
-
+        await Future.delayed(const Duration(seconds: 2));
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text(
-                  'Data export started. You will receive an email shortly.'),
+              content: const Text('Data export started. You will receive an email shortly.'),
               backgroundColor: Colors.green[600],
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
           );
         }
@@ -381,8 +245,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             content: const Text('Failed to export data. Please try again.'),
             backgroundColor: Colors.red[600],
             behavior: SnackBarBehavior.floating,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         );
       }
@@ -396,8 +259,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Account'),
-        content: const Text(
-            'Are you sure you want to delete your account? This action cannot be undone.'),
+        content: const Text('Are you sure you want to delete your account? This action cannot be undone.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -430,12 +292,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content:
-                  const Text('Failed to delete account. Please try again.'),
+              content: const Text('Failed to delete account. Please try again.'),
               backgroundColor: Colors.red[600],
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
           );
         }
@@ -448,6 +308,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 400;
+    final padding = isSmallScreen ? 16.0 : 20.0;
     
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFF8F9FA),
@@ -469,362 +332,311 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     'Loading settings...'.tr(),
                     style: TextStyle(
                       color: isDark ? Colors.white70 : Colors.grey[600],
+                      fontSize: isSmallScreen ? 14 : 16,
                     ),
                   ),
                 ],
               ),
             )
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(padding),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Account Section
-                  _buildSectionHeader('Account Settings'.tr(), Icons.person_rounded, isDark),
-                  const SizedBox(height: 12),
-                  _buildSettingsCard(
-                    children: [
-                      _buildSettingsTile(
-                        icon: Icons.language_rounded,
-                        title: 'language'.tr(),
-                        subtitle: _getLanguageName(_language),
-                        onTap: _showLanguageDialog,
-                        isDark: isDark,
-                      ),
-                      _buildDivider(isDark),
-                      _buildSettingsTile(
-                        icon: Icons.dark_mode_rounded,
-                        title: 'dark_mode'.tr(),
-                        subtitle: 'Customize app appearance'.tr(),
-                        onTap: _showThemeDialog,
-                        isDark: isDark,
-                      ),
-                    ],
+                  _buildSectionHeader('Language & Region'.tr(), isSmallScreen),
+                  _buildSettingTile(
+                    icon: Icons.language_rounded,
+                    title: 'language'.tr(),
+                    subtitle: _getLanguageName(_language),
+                    onTap: _showLanguageDialog,
                     isDark: isDark,
+                    isSmallScreen: isSmallScreen,
                   ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Notifications Section
-                  _buildSectionHeader('Notifications'.tr(), Icons.notifications_rounded, isDark),
-                  const SizedBox(height: 12),
-                  _buildSettingsCard(
-                    children: [
-                      _buildSwitchTile(
-                        icon: Icons.notifications_active_rounded,
-                        title: 'Push Notifications'.tr(),
-                        subtitle: 'Receive app notifications'.tr(),
-                        value: _pushNotifications,
-                        onChanged: (value) async {
-                          setState(() => _pushNotifications = value);
-                          await _saveSetting('push_notifications', value);
-                        },
-                        isDark: isDark,
-                      ),
-                      _buildDivider(isDark),
-                      _buildSwitchTile(
-                        icon: Icons.email_rounded,
-                        title: 'Email Notifications'.tr(),
-                        subtitle: 'Receive email updates'.tr(),
-                        value: _emailNotifications,
-                        onChanged: (value) async {
-                          setState(() => _emailNotifications = value);
-                          await _saveSetting('email_notifications', value);
-                        },
-                        isDark: isDark,
-                      ),
-                    ],
+                  SizedBox(height: isSmallScreen ? 6 : 8),
+                  _buildSettingTile(
+                    icon: Icons.palette_rounded,
+                    title: 'dark_mode'.tr(),
+                    subtitle: 'Customize app appearance'.tr(),
+                    onTap: _showThemeDialog,
                     isDark: isDark,
+                    isSmallScreen: isSmallScreen,
                   ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Privacy & Safety Section
-                  _buildSectionHeader('Privacy & Safety'.tr(), Icons.security_rounded, isDark),
-                  const SizedBox(height: 12),
-                  _buildSettingsCard(
-                    children: [
-                      _buildSettingsTile(
-                        icon: Icons.privacy_tip_rounded,
-                        title: 'Privacy & Safety Guidelines'.tr(),
-                        subtitle: 'View safety guidelines'.tr(),
-                        onTap: _showPrivacyAndSafetyDialog,
-                        isDark: isDark,
-                      ),
-                      _buildDivider(isDark),
-                      _buildSwitchTile(
-                        icon: Icons.location_on_rounded,
-                        title: 'Location Sharing'.tr(),
-                        subtitle: 'Share location in reports'.tr(),
-                        value: _locationSharing,
-                        onChanged: (value) async {
-                          setState(() => _locationSharing = value);
-                          await _saveSetting('location_sharing', value);
-                        },
-                        isDark: isDark,
-                      ),
-                      _buildDivider(isDark),
-                      _buildSwitchTile(
-                        icon: Icons.analytics_rounded,
-                        title: 'Data Analytics'.tr(),
-                        subtitle: 'Help improve the app'.tr(),
-                        value: _dataAnalytics,
-                        onChanged: (value) async {
-                          setState(() => _dataAnalytics = value);
-                          await _saveSetting('data_analytics', value);
-                        },
-                        isDark: isDark,
-                      ),
-                    ],
+                  SizedBox(height: isSmallScreen ? 20 : 24),
+
+                  _buildSectionHeader('Notifications'.tr(), isSmallScreen),
+                  SwitchListTile(
+                    value: _pushNotifications,
+                    onChanged: (value) {
+                      setState(() => _pushNotifications = value);
+                      _saveSetting('push_notifications', value);
+                    },
+                    title: Text(
+                      'Push Notifications'.tr(),
+                      style: TextStyle(fontSize: isSmallScreen ? 15 : 16),
+                    ),
+                    subtitle: Text(
+                      'Receive app notifications'.tr(),
+                      style: TextStyle(fontSize: isSmallScreen ? 13 : 14),
+                    ),
+                    secondary: Icon(
+                      Icons.notifications_rounded,
+                      size: isSmallScreen ? 20 : 24,
+                    ),
+                    activeColor: const Color(0xFF2196F3),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: isSmallScreen ? 12 : 16,
+                      vertical: isSmallScreen ? 8 : 12,
+                    ),
+                  ),
+                  SwitchListTile(
+                    value: _emailNotifications,
+                    onChanged: (value) {
+                      setState(() => _emailNotifications = value);
+                      _saveSetting('email_notifications', value);
+                    },
+                    title: Text(
+                      'Email Notifications'.tr(),
+                      style: TextStyle(fontSize: isSmallScreen ? 15 : 16),
+                    ),
+                    subtitle: Text(
+                      'Receive email updates'.tr(),
+                      style: TextStyle(fontSize: isSmallScreen ? 13 : 14),
+                    ),
+                    secondary: Icon(
+                      Icons.email_rounded,
+                      size: isSmallScreen ? 20 : 24,
+                    ),
+                    activeColor: const Color(0xFF2196F3),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: isSmallScreen ? 12 : 16,
+                      vertical: isSmallScreen ? 8 : 12,
+                    ),
+                  ),
+                  SizedBox(height: isSmallScreen ? 20 : 24),
+
+                  _buildSectionHeader('Privacy & Safety'.tr(), isSmallScreen),
+                  SwitchListTile(
+                    value: _locationSharing,
+                    onChanged: (value) {
+                      setState(() => _locationSharing = value);
+                      _saveSetting('location_sharing', value);
+                    },
+                    title: Text(
+                      'Location Sharing'.tr(),
+                      style: TextStyle(fontSize: isSmallScreen ? 15 : 16),
+                    ),
+                    subtitle: Text(
+                      'Share location in reports'.tr(),
+                      style: TextStyle(fontSize: isSmallScreen ? 13 : 14),
+                    ),
+                    secondary: Icon(
+                      Icons.location_on_rounded,
+                      size: isSmallScreen ? 20 : 24,
+                    ),
+                    activeColor: const Color(0xFF2196F3),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: isSmallScreen ? 12 : 16,
+                      vertical: isSmallScreen ? 8 : 12,
+                    ),
+                  ),
+                  SwitchListTile(
+                    value: _dataAnalytics,
+                    onChanged: (value) {
+                      setState(() => _dataAnalytics = value);
+                      _saveSetting('data_analytics', value);
+                    },
+                    title: Text(
+                      'Data Analytics'.tr(),
+                      style: TextStyle(fontSize: isSmallScreen ? 15 : 16),
+                    ),
+                    subtitle: Text(
+                      'Help improve the app'.tr(),
+                      style: TextStyle(fontSize: isSmallScreen ? 13 : 14),
+                    ),
+                    secondary: Icon(
+                      Icons.analytics_rounded,
+                      size: isSmallScreen ? 20 : 24,
+                    ),
+                    activeColor: const Color(0xFF2196F3),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: isSmallScreen ? 12 : 16,
+                      vertical: isSmallScreen ? 8 : 12,
+                    ),
+                  ),
+                  SizedBox(height: isSmallScreen ? 6 : 8),
+                  _buildSettingTile(
+                    icon: Icons.security_rounded,
+                    title: 'Privacy & Safety'.tr(),
+                    subtitle: 'View safety guidelines'.tr(),
+                    onTap: _showPrivacyAndSafetyDialog,
                     isDark: isDark,
+                    isSmallScreen: isSmallScreen,
                   ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Security Section
-                  _buildSectionHeader('Security'.tr(), Icons.lock_rounded, isDark),
-                  const SizedBox(height: 12),
-                  _buildSettingsCard(
-                    children: [
-                      _buildSwitchTile(
-                        icon: Icons.fingerprint_rounded,
-                        title: 'Biometric Authentication'.tr(),
-                        subtitle: 'Use fingerprint or face ID'.tr(),
-                        value: _biometricAuth,
-                        onChanged: (value) async {
-                          setState(() => _biometricAuth = value);
-                          await _saveSetting('biometric_auth', value);
-                        },
-                        isDark: isDark,
+                  SizedBox(height: isSmallScreen ? 20 : 24),
+
+                  _buildSectionHeader('Security'.tr(), isSmallScreen),
+                  SwitchListTile(
+                    value: _biometricAuth,
+                    onChanged: (value) {
+                      setState(() => _biometricAuth = value);
+                      _saveSetting('biometric_auth', value);
+                    },
+                    title: Text(
+                      'Biometric Authentication'.tr(),
+                      style: TextStyle(fontSize: isSmallScreen ? 15 : 16),
+                    ),
+                    subtitle: Text(
+                      'Use fingerprint or face ID'.tr(),
+                      style: TextStyle(fontSize: isSmallScreen ? 13 : 14),
+                    ),
+                    secondary: Icon(
+                      Icons.fingerprint_rounded,
+                      size: isSmallScreen ? 20 : 24,
+                    ),
+                    activeColor: const Color(0xFF2196F3),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: isSmallScreen ? 12 : 16,
+                      vertical: isSmallScreen ? 8 : 12,
+                    ),
+                  ),
+                  SwitchListTile(
+                    value: _twoFactorAuth,
+                    onChanged: (value) {
+                      setState(() => _twoFactorAuth = value);
+                      _saveSetting('two_factor_auth', value);
+                    },
+                    title: Text(
+                      'Two-Factor Authentication'.tr(),
+                      style: TextStyle(fontSize: isSmallScreen ? 15 : 16),
+                    ),
+                    subtitle: Text(
+                      'Add extra security layer'.tr(),
+                      style: TextStyle(fontSize: isSmallScreen ? 13 : 14),
+                    ),
+                    secondary: Icon(
+                      Icons.security_rounded,
+                      size: isSmallScreen ? 20 : 24,
+                    ),
+                    activeColor: const Color(0xFF2196F3),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: isSmallScreen ? 12 : 16,
+                      vertical: isSmallScreen ? 8 : 12,
+                    ),
+                  ),
+                  SizedBox(height: isSmallScreen ? 20 : 24),
+
+                  _buildSectionHeader('Support & Help'.tr(), isSmallScreen),
+                  _buildSettingTile(
+                    icon: Icons.help_rounded,
+                    title: 'Help & FAQ'.tr(),
+                    subtitle: 'Get help and answers'.tr(),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const HelpFAQScreen(),
                       ),
-                      _buildDivider(isDark),
-                      _buildSwitchTile(
-                        icon: Icons.security_rounded,
-                        title: 'Two-Factor Authentication'.tr(),
-                        subtitle: 'Add extra security layer'.tr(),
-                        value: _twoFactorAuth,
-                        onChanged: (value) async {
-                          setState(() => _twoFactorAuth = value);
-                          await _saveSetting('two_factor_auth', value);
-                        },
-                        isDark: isDark,
-                      ),
-                    ],
+                    ),
                     isDark: isDark,
+                    isSmallScreen: isSmallScreen,
                   ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Help & Support Section
-                  _buildSectionHeader('Help & Support'.tr(), Icons.help_rounded, isDark),
-                  const SizedBox(height: 12),
-                  _buildSettingsCard(
-                    children: [
-                      _buildSettingsTile(
-                        icon: Icons.help_outline_rounded,
-                        title: 'Help & FAQ'.tr(),
-                        subtitle: 'Get help and answers'.tr(),
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const HelpFAQScreen(),
-                            ),
-                          );
-                        },
-                        isDark: isDark,
-                      ),
-                      _buildDivider(isDark),
-                      _buildSettingsTile(
-                        icon: Icons.accessibility_rounded,
-                        title: 'Accessibility'.tr(),
-                        subtitle: 'Customize accessibility options'.tr(),
-                        onTap: _showAccessibilityDialog,
-                        isDark: isDark,
-                      ),
-                    ],
+                  SizedBox(height: isSmallScreen ? 20 : 24),
+
+                  _buildSectionHeader('Data Management'.tr(), isSmallScreen),
+                  _buildSettingTile(
+                    icon: Icons.download_rounded,
+                    title: 'Export Data'.tr(),
+                    subtitle: 'Download your data'.tr(),
+                    onTap: _exportData,
                     isDark: isDark,
+                    isSmallScreen: isSmallScreen,
                   ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Data Management Section
-                  _buildSectionHeader('Data Management'.tr(), Icons.storage_rounded, isDark),
-                  const SizedBox(height: 12),
-                  _buildSettingsCard(
-                    children: [
-                      _buildSettingsTile(
-                        icon: Icons.download_rounded,
-                        title: 'Export Data'.tr(),
-                        subtitle: 'Download your data'.tr(),
-                        onTap: _exportData,
-                        isDark: isDark,
-                      ),
-                      _buildDivider(isDark),
-                      _buildSettingsTile(
-                        icon: Icons.delete_forever_rounded,
-                        title: 'Delete Account'.tr(),
-                        subtitle: 'Permanently delete your account'.tr(),
-                        onTap: _deleteAccount,
-                        isDark: isDark,
-                        isDestructive: true,
-                      ),
-                    ],
+                  _buildSettingTile(
+                    icon: Icons.delete_forever_rounded,
+                    title: 'Delete Account'.tr(),
+                    subtitle: 'Permanently delete account'.tr(),
+                    onTap: _deleteAccount,
                     isDark: isDark,
+                    isSmallScreen: isSmallScreen,
+                    isDestructive: true,
                   ),
-                  
-                  const SizedBox(height: 32),
+                  SizedBox(height: isSmallScreen ? 30 : 40),
                 ],
               ),
             ),
     );
   }
 
-  Widget _buildSectionHeader(String title, IconData icon, bool isDark) {
-    return Row(
-      children: [
-        Icon(
-          icon,
-          color: isDark ? Colors.white70 : const Color(0xFF2196F3),
-          size: 20,
+  Widget _buildSectionHeader(String title, bool isSmallScreen) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: isSmallScreen ? 10 : 12, top: isSmallScreen ? 6 : 8),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: isSmallScreen ? 16 : 18,
+          fontWeight: FontWeight.w700,
+          color: const Color(0xFF2196F3),
         ),
-        const SizedBox(width: 8),
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: isDark ? Colors.white : Colors.black87,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSettingsCard({required List<Widget> children, required bool isDark}) {
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF2A2A2A) : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark ? const Color(0xFF404040) : Colors.grey[200]!,
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: isDark 
-              ? Colors.black.withOpacity(0.3)
-              : Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
-      child: Column(children: children),
     );
   }
 
-  Widget _buildSettingsTile({
+  Widget _buildSettingTile({
     required IconData icon,
     required String title,
     required String subtitle,
     required VoidCallback onTap,
     required bool isDark,
     bool isDestructive = false,
+    bool isSmallScreen = false,
   }) {
-    return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: isDestructive 
-            ? Colors.red.withOpacity(0.1)
-            : (isDark ? const Color(0xFF2196F3).withOpacity(0.1) : const Color(0xFFE3F2FD)),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Icon(
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF2A2A2A) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ListTile(
+        leading: Icon(
           icon,
-          color: isDestructive 
-            ? Colors.red 
-            : (isDark ? const Color(0xFF2196F3) : const Color(0xFF1976D2)),
+          color: isDestructive ? Colors.red : const Color(0xFF2196F3),
+          size: isSmallScreen ? 20 : 24,
+        ),
+        title: Text(
+          title,
+          style: TextStyle(
+            fontSize: isSmallScreen ? 15 : 16,
+            fontWeight: FontWeight.w600,
+            color: isDestructive ? Colors.red : (isDark ? Colors.white : Colors.black87),
+          ),
+        ),
+        subtitle: Text(
+          subtitle,
+          style: TextStyle(
+            fontSize: isSmallScreen ? 13 : 14,
+            color: isDark ? Colors.white70 : Colors.grey[600],
+          ),
+        ),
+        trailing: const Icon(
+          Icons.chevron_right_rounded,
+          color: Color(0xFF2196F3),
           size: 20,
         ),
-      ),
-      title: Text(
-        title,
-        style: TextStyle(
-          color: isDestructive 
-            ? Colors.red 
-            : (isDark ? Colors.white : Colors.black87),
-          fontWeight: FontWeight.w500,
+        onTap: onTap,
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: isSmallScreen ? 12 : 16,
+          vertical: isSmallScreen ? 8 : 12,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
         ),
       ),
-      subtitle: Text(
-        subtitle,
-        style: TextStyle(
-          color: isDark ? Colors.white70 : Colors.grey[600],
-          fontSize: 12,
-        ),
-      ),
-      trailing: Icon(
-        Icons.arrow_forward_ios_rounded,
-        color: isDark ? Colors.white54 : Colors.grey[400],
-        size: 16,
-      ),
-      onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
     );
   }
-
-  Widget _buildSwitchTile({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-    required bool isDark,
-  }) {
-    return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF2196F3).withOpacity(0.1) : const Color(0xFFE3F2FD),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Icon(
-          icon,
-          color: isDark ? const Color(0xFF2196F3) : const Color(0xFF1976D2),
-          size: 20,
-        ),
-      ),
-      title: Text(
-        title,
-        style: TextStyle(
-          color: isDark ? Colors.white : Colors.black87,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: TextStyle(
-          color: isDark ? Colors.white70 : Colors.grey[600],
-          fontSize: 12,
-        ),
-      ),
-      trailing: Switch(
-        value: value,
-        onChanged: onChanged,
-        activeColor: const Color(0xFF2196F3),
-        activeTrackColor: const Color(0xFF2196F3).withOpacity(0.3),
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-    );
-  }
-
-  Widget _buildDivider(bool isDark) {
-    return Divider(
-      height: 1,
-      color: isDark ? const Color(0xFF404040) : Colors.grey[200],
-      indent: 56,
-      endIndent: 16,
-    );
-  }
-}
+} 

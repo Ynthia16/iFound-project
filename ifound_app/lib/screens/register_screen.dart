@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../components/ifound_logo.dart';
 import '../components/ifound_textfield.dart';
 import '../components/ifound_button.dart';
-import 'main_shell.dart';
+// import 'main_shell.dart'; // Not needed
 import '../services/auth_service.dart';
 import 'package:easy_localization/easy_localization.dart';
 
@@ -40,42 +40,49 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 400;
+    final padding = isSmallScreen ? 16.0 : 24.0;
+    final logoSize = isSmallScreen ? 80.0 : 100.0;
+    final titleSize = isSmallScreen ? 24.0 : 28.0;
+    final verticalPadding = isSmallScreen ? 20.0 : 32.0;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+          padding: EdgeInsets.symmetric(horizontal: padding, vertical: verticalPadding),
           child: Form(
             key: _formKey,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const SizedBox(height: 40),
-                IFoundLogo(size: 100),
-                const SizedBox(height: 32),
+                SizedBox(height: isSmallScreen ? 20 : 40),
+                IFoundLogo(size: logoSize),
+                SizedBox(height: isSmallScreen ? 20 : 32),
                 Text(
                   'create_account'.tr(),
                   style: TextStyle(
-                    fontSize: 28,
+                    fontSize: titleSize,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF2196F3),
                   ),
                 ),
-                const SizedBox(height: 32),
+                SizedBox(height: isSmallScreen ? 20 : 32),
                 IFoundTextField(
                   label: 'full_name'.tr(),
                   controller: nameController,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'full_name' ' required';
+                      return 'Full name is required';
                     }
                     if (value.trim().split(' ').length < 2) {
-                      return 'full_name' ' min 2';
+                      return 'Please enter your full name (first and last name)';
                     }
                     return null;
                   },
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: isSmallScreen ? 16 : 20),
                 IFoundTextField(
                   label: 'email'.tr(),
                   controller: emailController,
@@ -91,7 +98,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: isSmallScreen ? 16 : 20),
                 IFoundTextField(
                   label: 'Password',
                   controller: passwordController,
@@ -106,11 +113,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 32),
+                SizedBox(height: isSmallScreen ? 24 : 32),
                 if (_isLoading)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    child: CircularProgressIndicator(),
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: isSmallScreen ? 12 : 16),
+                    child: const CircularProgressIndicator(),
                   ),
                 if (!_isLoading)
                   IFoundButton(
@@ -126,9 +133,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         );
                         
                         if (userCredential != null) {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (context) => const MainShell()),
-                        );
+                          // Show success message and navigate to login
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('✅ Account created successfully! Please sign in.'.tr()),
+                                backgroundColor: Colors.green,
+                                duration: const Duration(seconds: 3),
+                              ),
+                            );
+                            // Navigate back to login screen after successful registration
+                            Navigator.of(context).pop();
+                          }
                         }
                       } catch (e) {
                         if (context.mounted) {
@@ -141,20 +157,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       }
                     },
                   ),
-                const SizedBox(height: 24),
+                SizedBox(height: isSmallScreen ? 16 : 24),
                 TextButton(
                   onPressed: _isLoading ? null : () {
                     Navigator.of(context).pop();
                   },
-                  child: const Text(
+                  child: Text(
                     'Already have an account? Login',
                     style: TextStyle(
                       color: Color(0xFF2196F3),
-                      fontSize: 16,
+                      fontSize: isSmallScreen ? 14 : 16,
                     ),
                   ),
                 ),
-                const SizedBox(height: 40),
+                SizedBox(height: isSmallScreen ? 20 : 40),
               ],
             ),
           ),

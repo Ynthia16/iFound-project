@@ -54,6 +54,11 @@ class _SectorDropdownState extends State<SectorDropdown> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black87;
+    final borderColor = isDark ? Colors.grey[600]! : Colors.grey[300]!;
+    final labelColor = isDark ? Colors.white70 : Colors.black54;
+    
     if (_loading) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -82,23 +87,31 @@ class _SectorDropdownState extends State<SectorDropdown> {
             return TextField(
               controller: controller,
               focusNode: focusNode,
-              style: GoogleFonts.poppins(fontSize: 16),
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                color: textColor,
+              ),
               decoration: InputDecoration(
                 labelText: 'Sector/Station',
-                labelStyle: GoogleFonts.poppins(fontSize: 16),
+                labelStyle: GoogleFonts.poppins(
+                  fontSize: 16,
+                  color: labelColor,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(width: 2),
+                  borderSide: BorderSide(width: 2, color: borderColor),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(width: 2, color: Colors.grey[300]!),
+                  borderSide: BorderSide(width: 2, color: borderColor),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide: const BorderSide(width: 2, color: Color(0xFF2196F3)),
                 ),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                filled: true,
+                fillColor: isDark ? const Color(0xFF1A1A1A) : Colors.grey[50],
               ),
               onChanged: (val) {
                 setState(() {
@@ -109,29 +122,62 @@ class _SectorDropdownState extends State<SectorDropdown> {
               },
             );
           },
+          optionsViewBuilder: (context, onSelected, options) {
+            return Material(
+              color: isDark ? const Color(0xFF2A2A2A) : Colors.white,
+              child: Container(
+                constraints: const BoxConstraints(maxHeight: 200),
+                child: ListView.builder(
+                  padding: EdgeInsets.zero,
+                  itemCount: options.length,
+                  itemBuilder: (context, index) {
+                    final option = options.elementAt(index);
+                    return ListTile(
+                      title: Text(
+                        option,
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          color: textColor,
+                        ),
+                      ),
+                      onTap: () => onSelected(option),
+                    );
+                  },
+                ),
+              ),
+            );
+          },
         ),
         if (_isOther)
           Padding(
             padding: const EdgeInsets.only(top: 16),
             child: TextField(
               controller: _otherController,
-              style: GoogleFonts.poppins(fontSize: 16),
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                color: textColor,
+              ),
               decoration: InputDecoration(
                 labelText: 'Enter sector or police station',
-                labelStyle: GoogleFonts.poppins(fontSize: 16),
+                labelStyle: GoogleFonts.poppins(
+                  fontSize: 16,
+                  color: labelColor,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(width: 2),
+                  borderSide: BorderSide(width: 2, color: borderColor),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(width: 2, color: Colors.grey[300]!),
+                  borderSide: BorderSide(width: 2, color: borderColor),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide: const BorderSide(width: 2, color: Color(0xFF2196F3)),
                 ),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                filled: true,
+                fillColor: isDark ? const Color(0xFF1A1A1A) : Colors.grey[50],
               ),
               onChanged: (val) {
                 setState(() {

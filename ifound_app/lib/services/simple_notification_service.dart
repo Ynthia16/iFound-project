@@ -1,5 +1,4 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -7,7 +6,6 @@ class NotificationService {
   NotificationService._internal();
 
   final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<void> initialize() async {
     try {
@@ -29,7 +27,7 @@ class NotificationService {
 
       await _localNotifications.initialize(initSettings);
     } catch (e) {
-      print('Failed to initialize local notifications: $e');
+      // Failed to initialize local notifications: $e
       // Continue initialization even if local notifications fail
     }
   }
@@ -49,7 +47,7 @@ class NotificationService {
       );
       
     } catch (e) {
-      print('Failed to send match notification: $e');
+      // Failed to send match notification: $e
     }
   }
 

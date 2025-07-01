@@ -5,7 +5,7 @@ import '../components/ifound_button.dart';
 import '../components/ifound_logo.dart';
 import '../services/auth_service.dart';
 import 'register_screen.dart';
-import 'home_screen.dart';
+import 'main_shell.dart';
 
 /// Login screen for user authentication.
 class LoginScreen extends StatefulWidget {
@@ -54,15 +54,36 @@ class _LoginScreenState extends State<LoginScreen> {
           _successMessage = 'Welcome back!';
         });
 
-        // Navigate to home screen
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => HomeScreen(onTabSelected: (index) {})),
-        );
+        // Show success message briefly before navigation
+        await Future.delayed(const Duration(milliseconds: 500));
+
+        if (mounted) {
+          // Clear the form
+          _emailController.clear();
+          _passwordController.clear();
+
+          // Force navigation to main screen
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const MainShell()),
+            (route) => false,
+          );
+        }
       }
     } catch (e) {
-      setState(() {
-        _errorMessage = e.toString();
-      });
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString().replaceAll('Exception: ', '');
+        });
+
+        // Show error in snackbar as well
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ $_errorMessage'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
     } finally {
       if (mounted) {
         setState(() {
@@ -87,15 +108,32 @@ class _LoginScreenState extends State<LoginScreen> {
           _successMessage = 'Welcome!';
         });
 
-        // Navigate to home screen
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => HomeScreen(onTabSelected: (index) {})),
-        );
+        // Show success message briefly before navigation
+        await Future.delayed(const Duration(milliseconds: 500));
+
+        if (mounted) {
+          // Force navigation to main screen
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const MainShell()),
+            (route) => false,
+          );
+        }
       }
     } catch (e) {
-      setState(() {
-        _errorMessage = e.toString();
-      });
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString().replaceAll('Exception: ', '');
+        });
+
+        // Show error in snackbar as well
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ $_errorMessage'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
     } finally {
       if (mounted) {
         setState(() {
@@ -172,7 +210,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Text(
                           errorMsg ?? '',
                           style: GoogleFonts.poppins(
-                            color: Colors.red[700], 
+                            color: Colors.red[700],
                             fontSize: 14,
                           ),
                         ),
@@ -198,7 +236,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Text(
                           successMsg ?? '',
                           style: GoogleFonts.poppins(
-                            color: Colors.green[700], 
+                            color: Colors.green[700],
                             fontSize: 14,
                           ),
                         ),
@@ -237,11 +275,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   setDialogState(() {
                     successMsg = 'Password reset email sent! Check your inbox.';
                   });
-                  
+
                   // Auto-close after 2 seconds
-                  Future.delayed(const Duration(seconds: 2), () {
-                    if (mounted) Navigator.of(context).pop();
-                  });
+                  if (mounted) {
+                    final navigator = Navigator.of(context);
+                    Future.delayed(const Duration(seconds: 2), () {
+                      if (mounted) navigator.pop();
+                    });
+                  }
                 } catch (e) {
                   setDialogState(() {
                     errorMsg = e.toString();
@@ -278,27 +319,32 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 400;
+    final padding = isSmallScreen ? 16.0 : 24.0;
+    final logoSize = isSmallScreen ? 60.0 : 80.0;
+    final titleSize = isSmallScreen ? 24.0 : 28.0;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.all(padding),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 40),
+                SizedBox(height: isSmallScreen ? 20 : 40),
 
                 // Logo and Welcome
-                const IFoundLogo(size: 80),
-                const SizedBox(height: 24),
+                IFoundLogo(size: logoSize),
+                SizedBox(height: isSmallScreen ? 16 : 24),
 
                 Text(
                   'Welcome to iFound',
                   style: GoogleFonts.poppins(
-                    fontSize: 28,
+                    fontSize: titleSize,
                     fontWeight: FontWeight.bold,
                     color: isDark ? Colors.white : const Color(0xFF1A1A1A),
                   ),
@@ -309,17 +355,17 @@ class _LoginScreenState extends State<LoginScreen> {
                 Text(
                   'Sign in to report lost or found documents',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: isSmallScreen ? 14 : 16,
                     color: isDark ? Colors.white70 : Colors.grey[600],
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 40),
+                SizedBox(height: isSmallScreen ? 24 : 40),
 
                 // Error/Success Messages
                 if (_errorMessage != null) ...[
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: EdgeInsets.all(isSmallScreen ? 10 : 12),
                     decoration: BoxDecoration(
                       color: Colors.red[50],
                       borderRadius: BorderRadius.circular(12),
@@ -327,23 +373,26 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.error_outline_rounded, color: Colors.red[600]),
-                        const SizedBox(width: 12),
+                        Icon(Icons.error_outline_rounded, color: Colors.red[600], size: isSmallScreen ? 18 : 20),
+                        SizedBox(width: isSmallScreen ? 8 : 12),
                         Expanded(
                           child: Text(
                             _errorMessage ?? '',
-                            style: TextStyle(color: Colors.red[700]),
+                            style: TextStyle(
+                              color: Colors.red[700],
+                              fontSize: isSmallScreen ? 13 : 14,
+                            ),
                           ),
                         ),
                       ],
+                    ),
                   ),
-                ),
                   const SizedBox(height: 16),
                 ],
 
                 if (_successMessage != null) ...[
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: EdgeInsets.all(isSmallScreen ? 10 : 12),
                     decoration: BoxDecoration(
                       color: Colors.green[50],
                       borderRadius: BorderRadius.circular(12),
@@ -351,12 +400,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.check_circle_rounded, color: Colors.green[600]),
-                        const SizedBox(width: 12),
+                        Icon(Icons.check_circle_rounded, color: Colors.green[600], size: isSmallScreen ? 18 : 20),
+                        SizedBox(width: isSmallScreen ? 8 : 12),
                         Expanded(
                           child: Text(
                             _successMessage ?? '',
-                            style: TextStyle(color: Colors.green[700]),
+                            style: TextStyle(
+                              color: Colors.green[700],
+                              fontSize: isSmallScreen ? 13 : 14,
+                            ),
                           ),
                         ),
                       ],
@@ -387,6 +439,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   controller: _passwordController,
                   label: 'Password',
                   obscureText: _obscurePassword,
+                  showPasswordToggle: true,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Password is required';
@@ -409,6 +462,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: TextStyle(
                         color: const Color(0xFF2196F3),
                         fontWeight: FontWeight.w600,
+                        fontSize: isSmallScreen ? 13 : 14,
                       ),
                     ),
                   ),
@@ -427,12 +481,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     Expanded(child: Divider(color: Colors.grey[400])),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 12 : 16),
                       child: Text(
                         'or',
                         style: TextStyle(
                           color: isDark ? Colors.white70 : Colors.grey[600],
-                          fontSize: 14,
+                          fontSize: isSmallScreen ? 12 : 14,
                         ),
                       ),
                     ),
@@ -453,10 +507,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       : const Icon(Icons.g_mobiledata, size: 24),
                   label: Text(
                     _isGoogleLoading ? 'Signing in...' : 'Continue with Google',
-                    style: const TextStyle(fontSize: 16),
+                    style: TextStyle(fontSize: isSmallScreen ? 14 : 16),
                   ),
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    padding: EdgeInsets.symmetric(vertical: isSmallScreen ? 14 : 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -475,24 +529,26 @@ class _LoginScreenState extends State<LoginScreen> {
                       "Don't have an account? ",
                       style: TextStyle(
                         color: isDark ? Colors.white70 : Colors.grey[600],
-                  ),
+                        fontSize: isSmallScreen ? 13 : 14,
+                      ),
                     ),
-                TextButton(
+                    TextButton(
                       onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const RegisterScreen(),
-                            ),
-                          );
-                        },
-                  child: const Text(
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const RegisterScreen(),
+                          ),
+                        );
+                      },
+                      child: Text(
                         'Sign Up',
                         style: TextStyle(
-                          color: Color(0xFF2196F3),
+                          color: const Color(0xFF2196F3),
                           fontWeight: FontWeight.w600,
+                          fontSize: isSmallScreen ? 13 : 14,
                         ),
                       ),
-                  ),
+                    ),
                   ],
                 ),
               ],

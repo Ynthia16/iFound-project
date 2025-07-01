@@ -1,5 +1,4 @@
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 class IFoundLogo extends StatelessWidget {
   final double size;
@@ -7,9 +6,18 @@ class IFoundLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SvgPicture.asset(
-      'assets/ifound_logo.svg',
+    return Container(
       width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: const Color(0xFF2196F3),
+        borderRadius: BorderRadius.circular(size / 2),
+      ),
+      child: Icon(
+        Icons.search_rounded,
+        color: Colors.white,
+        size: size * 0.6,
+      ),
     );
   }
 } 

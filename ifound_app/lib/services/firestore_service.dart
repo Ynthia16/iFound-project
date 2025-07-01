@@ -29,22 +29,23 @@ class FirestoreService {
     final oppositeStatus = status == 'lost' ? 'found' : 'lost';
     
     try {
-      // Query for potential matches - simplified approach
+      // Query for potential matches - more precise matching
       var query = _db.collection('reports')
           .where('status', isEqualTo: oppositeStatus)
-          .where('name', isEqualTo: name);
+          .where('name', isEqualTo: name.trim())
+          .where('docType', isEqualTo: docType.trim());
       
       final snapshot = await query.get().timeout(const Duration(seconds: 15));
       
-      // Filter by document type in memory (more efficient)
+      // Convert to list of maps
       final matches = snapshot.docs.map((doc) => {
         'id': doc.id,
         ...doc.data(),
-      }).where((doc) => doc['docType'] == docType).toList();
+      }).toList();
       
       return matches;
     } catch (e) {
-      // Fallback: Get all reports and filter in memory
+      // Fallback: Get all reports and filter in memory for better compatibility
       try {
         final allReports = await _db.collection('reports').get().timeout(const Duration(seconds: 10));
         final allDocs = allReports.docs.map((doc) => {
@@ -52,7 +53,7 @@ class FirestoreService {
           ...doc.data(),
         }).toList();
         
-        // Filter in memory
+        // Filter in memory with exact matching
         final matches = allDocs.where((doc) {
           final docStatus = doc['status']?.toString().trim().toLowerCase();
           final docName = doc['name']?.toString().trim();
@@ -62,6 +63,7 @@ class FirestoreService {
           final nameMatch = docName == name.trim();
           final docTypeMatch = docDocType == docType.trim();
           
+          // Only return exact matches for name and document type
           return statusMatch && nameMatch && docTypeMatch;
         }).toList();
         
@@ -273,17 +275,17 @@ class FirestoreService {
     int? rating,
     String? userName,
   }) async {
-      try {
-        await _db.collection('feedback').add({
-          'userId': userId,
-          'feedback': feedback,
+    try {
+      await _db.collection('feedback').add({
+        'userId': userId,
+        'feedback': feedback,
         'rating': rating,
         'userName': userName,
         'likes': [],
         'replies': [],
-          'timestamp': FieldValue.serverTimestamp(),
-        });
-      } catch (e) {
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
       throw Exception('Failed to add feedback: $e');
     }
   }
@@ -310,8 +312,8 @@ class FirestoreService {
       });
     } catch (e) {
       throw Exception('Failed to toggle like: $e');
-      }
     }
+  }
 
   Future<void> addFeedbackReply({
     required String feedbackId,

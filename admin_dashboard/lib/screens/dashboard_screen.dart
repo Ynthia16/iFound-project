@@ -5,7 +5,6 @@ import '../providers/theme_provider.dart';
 import '../widgets/dashboard_overview.dart';
 import '../widgets/admin_navigation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -141,7 +140,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
   bool _isLoading = true;
   String _searchQuery = '';
   String _roleFilter = 'all';
-  Set<String> _selectedUsers = {};
+  final Set<String> _selectedUsers = {};
 
   @override
   void initState() {
@@ -314,8 +313,8 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
           ),
         ],
       ),
@@ -568,7 +567,7 @@ class _ReportsManagementScreenState extends State<ReportsManagementScreen> {
   String _searchQuery = '';
   String _statusFilter = 'all';
   String _typeFilter = 'all';
-  Set<String> _selectedReports = {};
+  final Set<String> _selectedReports = {};
 
   @override
   void initState() {
@@ -746,8 +745,8 @@ class _ReportsManagementScreenState extends State<ReportsManagementScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
           ),
         ],
       ),
@@ -1245,7 +1244,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                                     ],
                                   ),
                                 );
-                              }).toList(),
+                              }),
                           ],
                         ),
                       ),
@@ -1707,8 +1706,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                             const SnackBar(content: Text('Data cleared successfully'), backgroundColor: Colors.red),
                                           );
                                         },
-                                        child: const Text('Clear All'),
                                         style: TextButton.styleFrom(foregroundColor: Colors.red),
+                                        child: const Text('Clear All'),
                                       ),
                                     ],
                                   ),

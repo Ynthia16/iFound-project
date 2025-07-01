@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../components/ifound_appbar.dart';
 import '../components/ifound_background.dart';
+import '../utils/responsive_helper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
@@ -16,7 +18,6 @@ class _HelpFAQScreenState extends State<HelpFAQScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String _selectedCategory = 'all';
-  bool _showSearchResults = false;
 
   // FAQ Categories
   final List<Map<String, dynamic>> _categories = [
@@ -244,6 +245,17 @@ class _HelpFAQScreenState extends State<HelpFAQScreen> {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final isDark = themeProvider.themeMode == ThemeMode.dark;
+    final isSmallScreen = ResponsiveHelper.isSmallScreen(context);
+    
+    // Responsive sizing
+    final padding = isSmallScreen ? 12.0 : 20.0;
+    final cardPadding = isSmallScreen ? 12.0 : 16.0;
+    final titleFontSize = isSmallScreen ? 18.0 : 20.0;
+    final categoryFontSize = isSmallScreen ? 14.0 : 16.0;
+    final questionFontSize = isSmallScreen ? 15.0 : 16.0;
+    final answerFontSize = isSmallScreen ? 13.0 : 14.0;
+    final iconSize = isSmallScreen ? 20.0 : 24.0;
+    final searchFontSize = isSmallScreen ? 14.0 : 16.0;
     
     return IFoundBackground(
       child: Scaffold(
@@ -257,109 +269,94 @@ class _HelpFAQScreenState extends State<HelpFAQScreen> {
           children: [
             // Search Bar
             Padding(
-              padding: const EdgeInsets.all(20),
+              padding: EdgeInsets.all(padding),
               child: TextField(
                 controller: _searchController,
-                style: const TextStyle(fontSize: 16),
+                onChanged: (value) => setState(() => _searchQuery = value),
                 decoration: InputDecoration(
-                  hintText: 'Search questions...'.tr(),
-                  prefixIcon: const Icon(Icons.search_rounded, size: 24),
+                  hintText: 'Search FAQ...'.tr(),
+                  prefixIcon: const Icon(Icons.search_rounded),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear_rounded),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() => _searchQuery = '');
+                          },
+                        )
+                      : null,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(width: 2),
+                    borderRadius: BorderRadius.circular(isSmallScreen ? 12 : 16),
                   ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(width: 2, color: Colors.grey[300]!),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(width: 2, color: Color(0xFF2196F3)),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  filled: true,
+                  fillColor: isDark ? const Color(0xFF2A2A2A) : Colors.white,
                 ),
-                onChanged: (value) {
-                  setState(() {
-                    _searchQuery = value.toLowerCase();
-                    _showSearchResults = value.isNotEmpty;
-                  });
+                style: TextStyle(fontSize: searchFontSize),
+              ),
+            ),
+
+            // Category Filter
+            SizedBox(
+              height: isSmallScreen ? 80 : 100,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.symmetric(horizontal: padding),
+                itemCount: _categories.length,
+                itemBuilder: (context, index) {
+                  final category = _categories[index];
+                  final isSelected = _selectedCategory == category['id'];
+                  
+                  return Container(
+                    margin: EdgeInsets.only(right: isSmallScreen ? 8 : 12),
+                    child: GestureDetector(
+                      onTap: () => setState(() => _selectedCategory = category['id']),
+                      child: Container(
+                        padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? const Color(0xFF2196F3)
+                              : isDark ? const Color(0xFF2A2A2A) : Colors.white,
+                          borderRadius: BorderRadius.circular(isSmallScreen ? 12 : 16),
+                          border: Border.all(
+                            color: isSelected
+                                ? const Color(0xFF2196F3)
+                                : isDark ? const Color(0xFF404040) : Colors.grey[300]!,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              category['icon'],
+                              color: isSelected ? Colors.white : const Color(0xFF2196F3),
+                              size: iconSize,
+                            ),
+                            SizedBox(height: isSmallScreen ? 4 : 6),
+                            Text(
+                              category['title'].tr(),
+                              style: GoogleFonts.poppins(
+                                fontSize: categoryFontSize,
+                                fontWeight: FontWeight.w600,
+                                color: isSelected ? Colors.white : null,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
                 },
               ),
             ),
-            
-            // Categories
-            if (!_showSearchResults) ...[
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Text(
-                  'Categories'.tr(),
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                height: 120,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  itemCount: _categories.length,
-                  itemBuilder: (context, index) {
-                    final category = _categories[index];
-                    final isSelected = _selectedCategory == category['id'];
-                    
-                    return Container(
-                      width: 120,
-                      margin: const EdgeInsets.only(right: 16),
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _selectedCategory = category['id'];
-                          });
-                        },
-                        child: Card(
-                          elevation: isSelected ? 4 : 2,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          color: isSelected 
-                            ? const Color(0xFF2196F3) 
-                            : (isDark ? const Color(0xFF2A2A2A) : Colors.white),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  category['icon'],
-                                  color: isSelected ? Colors.white : const Color(0xFF2196F3),
-                                  size: 32,
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  category['title'].tr(),
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: isSelected ? Colors.white : null,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-            
+
             // FAQ List
             Expanded(
               child: _filteredFAQs.isEmpty
@@ -369,64 +366,73 @@ class _HelpFAQScreenState extends State<HelpFAQScreen> {
                         children: [
                           Icon(
                             Icons.search_off_rounded,
-                            size: 64,
+                            size: isSmallScreen ? 60 : 80,
                             color: Colors.grey[400],
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: isSmallScreen ? 12 : 16),
                           Text(
-                            _searchQuery.isNotEmpty
-                                ? 'No questions found for "$_searchQuery"'.tr()
-                                : 'No questions in this category'.tr(),
+                            'No FAQ found'.tr(),
+                            style: GoogleFonts.poppins(
+                              fontSize: titleFontSize,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          SizedBox(height: isSmallScreen ? 8 : 12),
+                          Text(
+                            'Try adjusting your search or category filter'.tr(),
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: answerFontSize,
                               color: Colors.grey[600],
                             ),
+                            textAlign: TextAlign.center,
                           ),
                         ],
                       ),
                     )
                   : ListView.builder(
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.all(padding),
                       itemCount: _filteredFAQs.length,
                       itemBuilder: (context, index) {
                         final faq = _filteredFAQs[index];
-                        return _buildFAQItem(faq, isDark);
+                        return Container(
+                          margin: EdgeInsets.only(bottom: isSmallScreen ? 8 : 12),
+                          child: Card(
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(isSmallScreen ? 12 : 16),
+                            ),
+                            child: ExpansionTile(
+                              title: Text(
+                                faq['question'],
+                                style: GoogleFonts.poppins(
+                                  fontSize: questionFontSize,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark ? Colors.white : const Color(0xFF1A1A1A),
+                                ),
+                              ),
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.all(cardPadding),
+                                  child: Text(
+                                    faq['answer'],
+                                    style: TextStyle(
+                                      fontSize: answerFontSize,
+                                      color: isDark ? Colors.white70 : Colors.grey[700],
+                                      height: 1.5,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
                       },
                     ),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildFAQItem(Map<String, dynamic> faq, bool isDark) {
-    return ExpansionTile(
-      title: Text(
-        faq['question'],
-        style: TextStyle(
-          fontWeight: FontWeight.w600,
-          color: isDark ? Colors.white : Colors.black87,
-        ),
-      ),
-      children: [
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF2A2A2A) : Colors.grey[50],
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(
-            faq['answer'],
-            style: TextStyle(
-              color: isDark ? Colors.white70 : Colors.grey[700],
-              height: 1.5,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

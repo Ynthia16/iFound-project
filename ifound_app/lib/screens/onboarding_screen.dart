@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../components/ifound_onboarding_page.dart';
 import '../components/ifound_button.dart';
 import '../components/ifound_background.dart';
+import '../utils/responsive_helper.dart';
 import 'login_screen.dart';
 
 /// Swipeable onboarding flow for new users.
@@ -46,7 +47,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('has_seen_onboarding', true);
     } catch (e) {
-      print('Failed to save onboarding status: $e');
+      // Failed to save onboarding status: $e
     }
 
     if (mounted) {
@@ -58,6 +59,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isSmallScreen = ResponsiveHelper.isSmallScreen(context);
+    final cardMargin = isSmallScreen 
+        ? const EdgeInsets.symmetric(vertical: 16, horizontal: 12)
+        : const EdgeInsets.symmetric(vertical: 24, horizontal: 16);
+    final cardPadding = isSmallScreen ? 20.0 : 32.0;
+    final bottomPadding = isSmallScreen ? 16.0 : 24.0;
+    final horizontalPadding = isSmallScreen ? 16.0 : 24.0;
+    final buttonWidth = isSmallScreen ? 120.0 : 160.0;
+
     return IFoundBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -75,11 +85,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     final page = _pages[index];
                     return Center(
                       child: Card(
-                        margin: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                        margin: cardMargin,
                         elevation: 8,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                         child: Padding(
-                          padding: const EdgeInsets.all(32),
+                          padding: EdgeInsets.all(cardPadding),
                           child: IFoundOnboardingPage(
                             asset: page['asset']!,
                             title: page['title']!,
@@ -104,26 +114,29 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 )),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20),
+                padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: bottomPadding),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     TextButton(
                       onPressed: _goToLogin,
                       style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isSmallScreen ? 12 : 16, 
+                          vertical: isSmallScreen ? 8 : 12
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text(
+                      child: Text(
                         'Skip',
-                        style: TextStyle(fontSize: 16),
+                        style: TextStyle(fontSize: isSmallScreen ? 14 : 16),
                       ),
                     ),
                     IFoundButton(
                       text: _currentPage == _pages.length - 1 ? 'Get Started' : 'Next',
-                      width: 160,
+                      width: buttonWidth,
                       onPressed: () {
                         if (_currentPage == _pages.length - 1) {
                           _goToLogin();

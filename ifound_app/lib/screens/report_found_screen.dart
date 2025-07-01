@@ -3,6 +3,7 @@ import '../components/report_document_form.dart';
 import '../components/ifound_background.dart';
 import '../components/post_feed_item.dart';
 import '../services/firestore_service.dart';
+import '../utils/responsive_helper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -147,201 +148,246 @@ class _ReportFoundScreenState extends State<ReportFoundScreen> with SingleTicker
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
     final hasUser = user != null;
+    final isSmallScreen = ResponsiveHelper.isSmallScreen(context);
+    
+    // Responsive sizing
+    final tabFontSize = isSmallScreen ? 12.0 : 14.0;
+    final tabIconSize = isSmallScreen ? 16.0 : 18.0;
+    final badgeFontSize = isSmallScreen ? 10.0 : 11.0;
     
     return IFoundBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: Text(
-            'Found Documents'.tr(), 
-            style: GoogleFonts.poppins(
-              fontWeight: FontWeight.w600,
-              fontSize: 20,
-            )
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(
+            hasUser ? (isSmallScreen ? 100 : 110) : (isSmallScreen ? 70 : 80)
           ),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh, size: 24),
-              onPressed: () {
-                _loadReports();
-              },
-              tooltip: 'Refresh'.tr(),
-              padding: const EdgeInsets.all(12),
-              constraints: const BoxConstraints(
-                minWidth: 48,
-                minHeight: 48,
-              ),
-            ),
-          ],
-          bottom: hasUser ? TabBar(
-            controller: _tabController,
-            indicatorColor: Colors.green,
-            labelColor: Colors.green,
-            unselectedLabelColor: Colors.grey,
-            labelStyle: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600),
-            unselectedLabelStyle: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w500),
-            indicatorSize: TabBarIndicatorSize.tab,
-            tabs: [
-              Tab(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.person, size: 18),
-                    const SizedBox(width: 6),
-                    Text('My Reports'.tr()),
-                    if (_myReports.isNotEmpty) ...[
-                      const SizedBox(width: 6),
-                      Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: Colors.green,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          '${_myReports.length}',
-                          style: GoogleFonts.poppins(
-                            color: Colors.white, 
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
+          child: Container(
+            color: Colors.transparent,
+            child: SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(
+                      top: isSmallScreen ? 12 : 16,
+                      left: isSmallScreen ? 12 : 20,
+                      right: isSmallScreen ? 12 : 20,
+                      bottom: isSmallScreen ? 4 : 8,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Found Documents'.tr(),
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.bold,
+                              fontSize: isSmallScreen ? 20 : 24,
+                              color: Colors.green[700],
+                              letterSpacing: 0.5,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.green.withOpacity(0.08),
+                                  blurRadius: 4,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              Tab(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.search, size: 18),
-                    const SizedBox(width: 6),
-                    Text('All Reports'.tr()),
-                    if (_allReports.isNotEmpty) ...[
-                      const SizedBox(width: 6),
-                      Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: Colors.grey,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          '${_allReports.length}',
-                          style: GoogleFonts.poppins(
-                            color: Colors.white, 
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
+                        IconButton(
+                          icon: Icon(Icons.refresh, size: isSmallScreen ? 18 : 22, color: Colors.green[700]),
+                          onPressed: _loadReports,
+                          tooltip: 'Refresh'.tr(),
+                          padding: EdgeInsets.all(isSmallScreen ? 6 : 8),
+                          constraints: BoxConstraints(
+                            minWidth: isSmallScreen ? 36 : 44,
+                            minHeight: isSmallScreen ? 36 : 44,
                           ),
                         ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ],
-          ) : null,
-        ),
-        body: hasUser ? TabBarView(
-          controller: _tabController,
-          children: [
-            _buildMyReportsTab(),
-            _buildAllReportsTab(),
-          ],
-        ) : _buildAllReportsTab(),
-        floatingActionButton: FloatingActionButton(
-          onPressed: _showAddFoundDocumentForm,
-          backgroundColor: Colors.green,
-          tooltip: 'Add Found Document',
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          child: const Icon(Icons.add, color: Colors.white, size: 28),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMyReportsTab() {
-    if (_isLoading) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Loading your reports...'),
-          ],
-        ),
-      );
-    }
-
-    if (_myReports.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.person_off, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
-            Text('No found reports yet'.tr(), style: GoogleFonts.poppins(fontSize: 18)),
-            SizedBox(height: 8),
-            Text('Tap the + button to report a found document'.tr(), 
-                 style: TextStyle(color: Colors.grey[600])),
-          ],
-        ),
-      );
-    }
-
-    return RefreshIndicator(
-      onRefresh: _loadReports,
-      child: ListView.separated(
-        padding: const EdgeInsets.all(16),
-        itemCount: _myReports.length,
-        separatorBuilder: (context, index) => const SizedBox(height: 12),
-        itemBuilder: (context, index) {
-          final data = _myReports[index];
-          final hasMatch = data['hasMatch'] == true;
-          
-          return Card(
-            elevation: 2,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: Stack(
-              children: [
-                PostFeedItem(
-                  name: data['name'] ?? '',
-                  docType: data['docType'] ?? '',
-                  status: data['status'] ?? '',
-                  sector: data['sector'] ?? '',
-                  timeAgo: _getTimeAgo(data['timestamp']),
-                ),
-                if (hasMatch)
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.orange,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.people, color: Colors.white, size: 16),
-                          SizedBox(width: 4),
-                          Text('CLAIMED', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    height: 3,
+                    width: 50,
+                    decoration: BoxDecoration(
+                      color: Colors.green[400],
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
+                  SizedBox(height: isSmallScreen ? 4 : 6),
+                  if (hasUser)
+                    Flexible(
+                      child: TabBar(
+                        controller: _tabController,
+                        indicatorColor: Colors.green,
+                        labelColor: Colors.green,
+                        unselectedLabelColor: Colors.grey,
+                        labelStyle: GoogleFonts.poppins(fontSize: tabFontSize, fontWeight: FontWeight.w600),
+                        unselectedLabelStyle: GoogleFonts.poppins(fontSize: tabFontSize, fontWeight: FontWeight.w500),
+                        indicatorSize: TabBarIndicatorSize.tab,
+                        isScrollable: isSmallScreen,
+                        tabs: [
+                          Tab(
+                            child: isSmallScreen 
+                              ? Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.person, size: tabIconSize * 0.8),
+                                    if (_myReports.isNotEmpty) ...[
+                                      SizedBox(height: 1),
+                                      Container(
+                                        padding: EdgeInsets.all(1),
+                                        decoration: BoxDecoration(
+                                          color: Colors.green,
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Text(
+                                          '${_myReports.length}',
+                                          style: GoogleFonts.poppins(
+                                            color: Colors.white, 
+                                            fontSize: 7,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                )
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.person, size: tabIconSize),
+                                    SizedBox(width: 6),
+                                    Flexible(
+                                      child: Text(
+                                        'My Reports'.tr(),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    if (_myReports.isNotEmpty) ...[
+                                      SizedBox(width: 6),
+                                      Container(
+                                        padding: EdgeInsets.all(4),
+                                        decoration: BoxDecoration(
+                                          color: Colors.green,
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        child: Text(
+                                          '${_myReports.length}',
+                                          style: GoogleFonts.poppins(
+                                            color: Colors.white, 
+                                            fontSize: badgeFontSize,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                          ),
+                          Tab(
+                            child: isSmallScreen 
+                              ? Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.public, size: tabIconSize * 0.8),
+                                    if (_allReports.isNotEmpty) ...[
+                                      SizedBox(height: 1),
+                                      Container(
+                                        padding: EdgeInsets.all(1),
+                                        decoration: BoxDecoration(
+                                          color: Colors.blue,
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Text(
+                                          '${_allReports.length}',
+                                          style: GoogleFonts.poppins(
+                                            color: Colors.white, 
+                                            fontSize: 7,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                )
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.public, size: tabIconSize),
+                                    SizedBox(width: 6),
+                                    Flexible(
+                                      child: Text(
+                                        'All Reports'.tr(),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    if (_allReports.isNotEmpty) ...[
+                                      SizedBox(width: 6),
+                                      Container(
+                                        padding: EdgeInsets.all(4),
+                                        decoration: BoxDecoration(
+                                          color: Colors.blue,
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        child: Text(
+                                          '${_allReports.length}',
+                                          style: GoogleFonts.poppins(
+                                            color: Colors.white, 
+                                            fontSize: badgeFontSize,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                          ),
                         ],
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
-          );
-        },
+          ),
+        ),
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            // My Reports Tab
+            _buildReportsList(_myReports, hasUser, isSmallScreen),
+            // All Reports Tab
+            _buildReportsList(_allReports, hasUser, isSmallScreen),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: _showAddFoundDocumentForm,
+          backgroundColor: Colors.green,
+          foregroundColor: Colors.white,
+          icon: Icon(Icons.add, size: isSmallScreen ? 20 : 24),
+          label: Text(
+            'Report Found'.tr(),
+            style: GoogleFonts.poppins(
+              fontSize: isSmallScreen ? 14 : 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildAllReportsTab() {
+  Widget _buildReportsList(List<Map<String, dynamic>> reports, bool hasUser, bool isSmallScreen) {
     if (_isLoading) {
       return const Center(
         child: Column(
@@ -349,13 +395,13 @@ class _ReportFoundScreenState extends State<ReportFoundScreen> with SingleTicker
           children: [
             CircularProgressIndicator(),
             SizedBox(height: 16),
-            Text('Loading all reports...'),
+            Text('Loading reports...'),
           ],
         ),
       );
     }
 
-    if (_allReports.isEmpty) {
+    if (reports.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -375,10 +421,10 @@ class _ReportFoundScreenState extends State<ReportFoundScreen> with SingleTicker
       onRefresh: _loadReports,
       child: ListView.separated(
         padding: const EdgeInsets.all(16),
-        itemCount: _allReports.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 12),
-      itemBuilder: (context, index) {
-          final data = _allReports[index];
+        itemCount: reports.length,
+        separatorBuilder: (context, index) => const SizedBox(height: 12),
+        itemBuilder: (context, index) {
+          final data = reports[index];
           final hasMatch = data['hasMatch'] == true;
           
           return Card(
@@ -387,10 +433,10 @@ class _ReportFoundScreenState extends State<ReportFoundScreen> with SingleTicker
             child: Stack(
               children: [
                 PostFeedItem(
-          name: data['name'] ?? '',
-          docType: data['docType'] ?? '',
-          status: data['status'] ?? '',
-          sector: data['sector'] ?? '',
+                  name: data['name'] ?? '',
+                  docType: data['docType'] ?? '',
+                  status: data['status'] ?? '',
+                  sector: data['sector'] ?? '',
                   timeAgo: _getTimeAgo(data['timestamp']),
                 ),
                 if (hasMatch)
