@@ -1,3 +1,6 @@
+// This manages the theme for my iFound app
+// I added dark mode because I think it looks better and saves battery
+// Users can switch between light and dark themes, and I remember their choice
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/firestore_service.dart';

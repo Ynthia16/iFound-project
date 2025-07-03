@@ -1,3 +1,6 @@
+// This is my admin dashboard - the management interface for iFound
+// I built this so administrators can manage users, reports, and see analytics
+// It's a web app that connects to the same Firebase database as the mobile app
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';

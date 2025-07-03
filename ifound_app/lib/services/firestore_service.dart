@@ -1,3 +1,6 @@
+// This handles all the database operations for my iFound app
+// I use Firebase Firestore to store reports, users, and feedback
+// The service includes caching to make the app faster and more reliable
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 
@@ -198,7 +201,9 @@ class FirestoreService {
     _cacheTimestamps.clear();
   }
 
-  // Search reports with filters
+  // This is my search function - it lets users find reports by different criteria
+  // I made it flexible so you can search by text, filter by status, type, sector, and dates
+  // The search works both in Firebase queries and in memory for better results
   Future<List<Map<String, dynamic>>> searchReports({
     String? searchQuery,
     String? status,

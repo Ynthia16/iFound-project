@@ -1,3 +1,6 @@
+// This handles all the authentication for my iFound app
+// I use Firebase Auth for secure login and registration
+// Users can sign up with email/password and I handle all the security stuff
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart';

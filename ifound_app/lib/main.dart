@@ -1,3 +1,6 @@
+// My iFound app - the main entry point
+// I built this to help people find their lost documents and items
+// The app connects to Firebase for real-time data and uses multiple languages
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:ifound_app/services/simple_notification_service.dart';
