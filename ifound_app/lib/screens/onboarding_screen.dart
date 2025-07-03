@@ -25,17 +25,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       'subtitle': 'Lost or found a document? iFound connects you.',
     },
     {
-      'asset': 'assets/ifound_logo.svg', // Replacing it  with a doc icon SVG
+      'asset': 'assets/ifound_logo.svg',
       'title': 'Report Lost or Found',
       'subtitle': 'Easily report lost or found documents in seconds.',
     },
     {
-      'asset': 'assets/ifound_logo.svg', // Replacing it with a privacy icon SVG
+      'asset': 'assets/ifound_logo.svg',
       'title': 'Safe & Private',
       'subtitle': 'No direct contact. Your info is secure and private.',
     },
     {
-      'asset': 'assets/ifound_logo.svg', // Replacing it  with a notify icon SVG
+      'asset': 'assets/ifound_logo.svg', 
       'title': 'Get Notified',
       'subtitle': 'We will alert you if there is a match for your document.',
     },
@@ -60,7 +60,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final isSmallScreen = ResponsiveHelper.isSmallScreen(context);
-    final cardMargin = isSmallScreen 
+    final cardMargin = isSmallScreen
         ? const EdgeInsets.symmetric(vertical: 16, horizontal: 12)
         : const EdgeInsets.symmetric(vertical: 24, horizontal: 16);
     final cardPadding = isSmallScreen ? 20.0 : 32.0;
@@ -122,7 +122,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       onPressed: _goToLogin,
                       style: TextButton.styleFrom(
                         padding: EdgeInsets.symmetric(
-                          horizontal: isSmallScreen ? 12 : 16, 
+                          horizontal: isSmallScreen ? 12 : 16,
                           vertical: isSmallScreen ? 8 : 12
                         ),
                         shape: RoundedRectangleBorder(

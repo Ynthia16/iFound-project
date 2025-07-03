@@ -198,6 +198,86 @@ class FirestoreService {
     _cacheTimestamps.clear();
   }
 
+  // Search reports with filters
+  Future<List<Map<String, dynamic>>> searchReports({
+    String? searchQuery,
+    String? status,
+    String? docType,
+    String? sector,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    try {
+      var query = _db.collection('reports').orderBy('timestamp', descending: true);
+
+      // Apply filters
+      if (status != null && status.isNotEmpty) {
+        query = query.where('status', isEqualTo: status);
+      }
+      if (docType != null && docType.isNotEmpty) {
+        query = query.where('docType', isEqualTo: docType);
+      }
+      if (sector != null && sector.isNotEmpty) {
+        query = query.where('sector', isEqualTo: sector);
+      }
+
+      final snapshot = await query.get().timeout(const Duration(seconds: 10));
+      
+      // Convert to list of maps
+      List<Map<String, dynamic>> reports = snapshot.docs.map((doc) => {
+        'id': doc.id,
+        ...doc.data(),
+      }).toList();
+
+      // Apply additional filters in memory
+      if (searchQuery != null && searchQuery.isNotEmpty) {
+        final query = searchQuery.toLowerCase();
+        reports = reports.where((report) {
+          final name = report['name']?.toString().toLowerCase() ?? '';
+          final docType = report['docType']?.toString().toLowerCase() ?? '';
+          final institution = report['institution']?.toString().toLowerCase() ?? '';
+          final sector = report['sector']?.toString().toLowerCase() ?? '';
+          
+          return name.contains(query) ||
+                 docType.contains(query) ||
+                 institution.contains(query) ||
+                 sector.contains(query);
+        }).toList();
+      }
+
+      // Apply date filters
+      if (startDate != null || endDate != null) {
+        reports = reports.where((report) {
+          final timestamp = report['timestamp'];
+          if (timestamp == null) return false;
+          
+          DateTime reportDate;
+          if (timestamp is Timestamp) {
+            reportDate = timestamp.toDate();
+          } else if (timestamp is int) {
+            reportDate = DateTime.fromMillisecondsSinceEpoch(timestamp);
+          } else {
+            return false;
+          }
+          
+          if (startDate != null && reportDate.isBefore(startDate)) {
+            return false;
+          }
+          if (endDate != null && reportDate.isAfter(endDate)) {
+            return false;
+          }
+          
+          return true;
+        }).toList();
+      }
+
+      return reports;
+    } catch (e) {
+      print('Error searching reports: $e');
+      return [];
+    }
+  }
+
   // Store match notification for UI display
   Future<void> _storeMatchNotification(String userId, List<Map<String, dynamic>> matches) async {
     try {

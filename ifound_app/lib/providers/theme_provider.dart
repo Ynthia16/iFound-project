@@ -139,7 +139,6 @@ class ThemeProvider extends ChangeNotifier {
 
   Future<void> loadTheme() async {
     try {
-      // First try to load from Firestore if user is logged in
     if (_userId != null) {
         final doc = await FirestoreService().getUserProfile(_userId!);
         if (doc != null && doc.exists) {
@@ -155,7 +154,7 @@ class ThemeProvider extends ChangeNotifier {
           return;
         }
     }
-      
+
       // Fallback to SharedPreferences
     final prefs = await SharedPreferences.getInstance();
     final themeStr = prefs.getString('themeMode');
@@ -190,10 +189,10 @@ class ThemeProvider extends ChangeNotifier {
     try {
       // Save to SharedPreferences first (immediate)
       final prefs = await SharedPreferences.getInstance();
-      final themeString = _themeMode == ThemeMode.dark ? 'dark' : 
+      final themeString = _themeMode == ThemeMode.dark ? 'dark' :
                          _themeMode == ThemeMode.light ? 'light' : 'system';
       await prefs.setString('themeMode', themeString);
-      
+
       // Then save to Firestore if user is logged in (background)
     if (_userId != null) {
       FirestoreService().setUserProfile(

@@ -28,7 +28,6 @@ void main() async {
   try {
     await NotificationService().initialize();
   } catch (e) {
-    // Failed to initialize notification service: $e
   }
 
   // Initialize Easy Localization
@@ -124,7 +123,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
     try {
       // Get current user immediately
       _currentUser = FirebaseAuth.instance.currentUser;
-      
+
       if (mounted) {
         setState(() {
           _isLoading = false;

@@ -10,10 +10,10 @@ class NotificationService {
   Future<void> initialize() async {
     try {
       // Initialize local notifications
-      const AndroidInitializationSettings androidSettings = 
+      const AndroidInitializationSettings androidSettings =
           AndroidInitializationSettings('@mipmap/ic_launcher');
-      
-      const DarwinInitializationSettings iosSettings = 
+
+      const DarwinInitializationSettings iosSettings =
           DarwinInitializationSettings(
         requestAlertPermission: true,
         requestBadgePermission: true,
@@ -27,7 +27,6 @@ class NotificationService {
 
       await _localNotifications.initialize(initSettings);
     } catch (e) {
-      // Failed to initialize local notifications: $e
       // Continue initialization even if local notifications fail
     }
   }
@@ -45,7 +44,7 @@ class NotificationService {
         body: '$matchName $docType found at $sector',
         payload: 'match_$userId',
       );
-      
+
     } catch (e) {
       // Failed to send match notification: $e
     }
@@ -97,4 +96,4 @@ class NotificationService {
       payload: payload,
     );
   }
-} 
+}

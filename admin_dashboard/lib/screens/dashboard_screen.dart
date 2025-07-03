@@ -621,8 +621,8 @@ class _ReportsManagementScreenState extends State<ReportsManagementScreen> {
 
       // Create audit log entry
       await _firestore.collection('audit_logs').add({
-        'adminId': 'current_admin', // In a real app, get from auth
-        'adminName': 'Admin User', // In a real app, get from auth
+        'adminId': 'current_admin', 
+        'adminName': 'Admin User',
         'action': 'delete_report',
         'description': 'Deleted report: ${reportData?['name'] ?? 'Unknown'} - ${reportData?['institution'] ?? 'Unknown'}',
         'timestamp': FieldValue.serverTimestamp(),
@@ -1397,7 +1397,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _loadSettings() async {
-    // In a real app, load settings from Firebase or local storage
     setState(() {
       _isLoading = false;
     });
@@ -1496,7 +1495,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               subtitle: const Text('Receive notifications via email'),
                               value: true,
                               onChanged: (value) {
-                                // Simple toggle without provider
+
                               },
                             ),
                             SwitchListTile(
@@ -1504,7 +1503,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               subtitle: const Text('Receive push notifications'),
                               value: true,
                               onChanged: (value) {
-                                // Simple toggle without provider
+
                               },
                             ),
                           ],

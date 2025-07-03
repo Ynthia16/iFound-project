@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../components/ifound_logo.dart';
 import '../components/ifound_textfield.dart';
 import '../components/ifound_button.dart';
-// import 'main_shell.dart'; // Not needed
 import '../services/auth_service.dart';
 import 'package:easy_localization/easy_localization.dart';
 
@@ -131,7 +130,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           passwordController.text.trim(),
                           nameController.text.trim(),
                         );
-                        
+
                         if (userCredential != null) {
                           // Show success message and navigate to login
                           if (context.mounted) {

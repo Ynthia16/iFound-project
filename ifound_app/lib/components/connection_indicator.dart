@@ -10,7 +10,7 @@ class ConnectionIndicator extends StatelessWidget {
     return Consumer<ConnectionProvider>(
       builder: (context, connectionProvider, child) {
         if (connectionProvider.isConnected && connectionProvider.isFirebaseConnected) {
-          return const SizedBox.shrink(); // Don't show anything when connected
+          return const SizedBox.shrink();
         }
 
         return Container(
@@ -23,7 +23,7 @@ class ConnectionIndicator extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  connectionProvider.isConnected 
+                  connectionProvider.isConnected
                     ? 'Firebase connection issue. Some features may be limited.'
                     : 'No internet connection. Working offline.',
                   style: const TextStyle(
@@ -39,4 +39,4 @@ class ConnectionIndicator extends StatelessWidget {
       },
     );
   }
-} 
+}

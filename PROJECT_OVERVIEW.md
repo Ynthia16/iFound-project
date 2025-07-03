@@ -6,6 +6,10 @@ A modern, real-time lost and found system with:
 - **Admin Dashboard** for administrators to manage users, reports, analytics, and system settings
 - **Live data**: Everything syncs instantly via Firebase
 
+## 🎥 Demo Video
+**Watch the iFound app in action:**
+- [Demo Video Link](https://drive.google.com/file/d/1e2UNig7HJZdp5A_PpW3wVuXQhU0dTlMq/view?usp=drive_link)
+
 ## How to Run & Test
 
 ### Mobile App (User Side)
@@ -59,4 +63,4 @@ A modern, real-time lost and found system with:
 
 ---
 
-*For more details, see the README in each app folder.* 
+*For more details, see the README in each app folder.*

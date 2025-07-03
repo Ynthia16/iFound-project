@@ -20,7 +20,6 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
   @override
   void initState() {
     super.initState();
-    // Removed auto-popup - users will manually trigger rating via FAB
   }
 
   @override
@@ -47,7 +46,7 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
     final starSize = isSmallScreen ? 36.0 : 48.0;
     final titleSize = isSmallScreen ? 18.0 : 22.0;
     final bodySize = isSmallScreen ? 14.0 : 16.0;
-    
+
     return Container(
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.7,
@@ -84,7 +83,7 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
                 ),
               ),
               SizedBox(height: isSmallScreen ? 20 : 28),
-              
+
               // Star icon with animation
               Container(
                 padding: EdgeInsets.all(isSmallScreen ? 16 : 20),
@@ -99,7 +98,7 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
                 ),
               ),
               SizedBox(height: isSmallScreen ? 20 : 24),
-              
+
               // Title
               Text(
                 'How was your experience?',
@@ -111,7 +110,7 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: isSmallScreen ? 8 : 12),
-              
+
               // Subtitle
               Text(
                 'Your feedback helps us improve iFound for everyone',
@@ -122,7 +121,7 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: isSmallScreen ? 28 : 36),
-              
+
               // Star rating
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -144,7 +143,7 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
                   );
                 }),
               ),
-              
+
               // Rating text
               if (_selectedRating > 0) ...[
                 SizedBox(height: isSmallScreen ? 16 : 20),
@@ -171,9 +170,9 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
                   ),
                 ),
               ],
-              
+
               SizedBox(height: isSmallScreen ? 24 : 32),
-              
+
               // Feedback section (always visible)
                 Container(
                   padding: EdgeInsets.all(isSmallScreen ? 16 : 20),
@@ -248,7 +247,7 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
                   ),
                 ),
                 SizedBox(height: isSmallScreen ? 20 : 24),
-              
+
               // Action buttons
               Row(
                 children: [
@@ -266,7 +265,7 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
                         ),
                       ),
                       child: Text(
-                        'Skip', 
+                        'Skip',
                         style: TextStyle(
                           fontSize: isSmallScreen ? 14 : 16,
                           color: isDark ? Colors.white70 : Colors.black54,
@@ -297,7 +296,7 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
                               ),
                             )
                           : Text(
-                              'Submit', 
+                              'Submit',
                               style: TextStyle(
                                 fontSize: isSmallScreen ? 14 : 16,
                                 fontWeight: FontWeight.w600,
@@ -384,7 +383,7 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
     final iconSize = isSmallScreen ? 24.0 : 32.0;
     final titleSize = isSmallScreen ? 18.0 : 22.0;
     final bodySize = isSmallScreen ? 14.0 : 16.0;
-    
+
     return Container(
       margin: EdgeInsets.all(margin),
       padding: EdgeInsets.all(padding),
@@ -466,7 +465,7 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
     final iconSize = isSmallScreen ? 16.0 : 20.0;
     final valueSize = isSmallScreen ? 16.0 : 20.0;
     final labelSize = isSmallScreen ? 12.0 : 14.0;
-    
+
     return Column(
       children: [
         Container(
@@ -508,7 +507,7 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
     final feedbackId = data['id'] ?? '';
     final currentUser = FirebaseAuth.instance.currentUser;
     final isLiked = currentUser != null && likes.contains(currentUser.uid);
-    
+
     final margin = isSmallScreen ? 8.0 : 16.0;
     final padding = isSmallScreen ? 12.0 : 16.0;
     final avatarSize = isSmallScreen ? 32.0 : 40.0;
@@ -907,7 +906,7 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 400;
     final padding = isSmallScreen ? 16.0 : 20.0;
-    
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
