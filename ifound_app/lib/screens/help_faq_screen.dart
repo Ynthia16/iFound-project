@@ -292,23 +292,23 @@ class _HelpFAQScreenState extends State<HelpFAQScreen> {
                   fillColor: isDark ? const Color(0xFF2A2A2A) : Colors.white,
                 ),
                 style: TextStyle(fontSize: searchFontSize),
+                ),
               ),
-            ),
 
             // Category Filter
-            SizedBox(
+              SizedBox(
               height: isSmallScreen ? 80 : 100,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
                 padding: EdgeInsets.symmetric(horizontal: padding),
-                itemCount: _categories.length,
-                itemBuilder: (context, index) {
-                  final category = _categories[index];
-                  final isSelected = _selectedCategory == category['id'];
-                  
-                  return Container(
+                  itemCount: _categories.length,
+                  itemBuilder: (context, index) {
+                    final category = _categories[index];
+                    final isSelected = _selectedCategory == category['id'];
+                    
+                    return Container(
                     margin: EdgeInsets.only(right: isSmallScreen ? 8 : 12),
-                    child: GestureDetector(
+                      child: GestureDetector(
                       onTap: () => setState(() => _selectedCategory = category['id']),
                       child: Container(
                         padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
@@ -318,8 +318,8 @@ class _HelpFAQScreenState extends State<HelpFAQScreen> {
                               : isDark ? const Color(0xFF2A2A2A) : Colors.white,
                           borderRadius: BorderRadius.circular(isSmallScreen ? 12 : 16),
                           border: Border.all(
-                            color: isSelected
-                                ? const Color(0xFF2196F3)
+                          color: isSelected 
+                            ? const Color(0xFF2196F3) 
                                 : isDark ? const Color(0xFF404040) : Colors.grey[300]!,
                           ),
                           boxShadow: [
@@ -330,33 +330,33 @@ class _HelpFAQScreenState extends State<HelpFAQScreen> {
                             ),
                           ],
                         ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              category['icon'],
-                              color: isSelected ? Colors.white : const Color(0xFF2196F3),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  category['icon'],
+                                  color: isSelected ? Colors.white : const Color(0xFF2196F3),
                               size: iconSize,
-                            ),
+                                ),
                             SizedBox(height: isSmallScreen ? 4 : 6),
-                            Text(
-                              category['title'].tr(),
+                                Text(
+                                  category['title'].tr(),
                               style: GoogleFonts.poppins(
                                 fontSize: categoryFontSize,
-                                fontWeight: FontWeight.w600,
-                                color: isSelected ? Colors.white : null,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
+                                    fontWeight: FontWeight.w600,
+                                    color: isSelected ? Colors.white : null,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
-            ),
-
+            
             // FAQ List
             Expanded(
               child: _filteredFAQs.isEmpty

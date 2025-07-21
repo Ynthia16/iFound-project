@@ -33,6 +33,7 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withOpacity(0.5),
       builder: (context) => _buildRatingDialog(),
     );
   }
@@ -49,16 +50,16 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
 
     return Container(
       constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.7,
+        maxHeight: MediaQuery.of(context).size.height * 0.75,
       ),
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 20,
-            offset: const Offset(0, -5),
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 25,
+            offset: const Offset(0, -8),
           ),
         ],
       ),
@@ -70,244 +71,271 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
           right: padding,
         ),
         child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Drag indicator
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
+          physics: const BouncingScrollPhysics(),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+              // Drag indicator with better design
+            Container(
+                width: 50,
+                height: 5,
+              decoration: BoxDecoration(
                   color: isDark ? Colors.grey[600] : Colors.grey[400],
-                  borderRadius: BorderRadius.circular(2),
-                ),
+                  borderRadius: BorderRadius.circular(3),
               ),
-              SizedBox(height: isSmallScreen ? 20 : 28),
+            ),
+              SizedBox(height: isSmallScreen ? 24 : 32),
 
-              // Star icon with animation
-              Container(
+              // Star icon with better animation
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 500),
                 padding: EdgeInsets.all(isSmallScreen ? 16 : 20),
                 decoration: BoxDecoration(
-                  color: Colors.amber.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.amber.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: Colors.amber.withOpacity(0.3),
+                    width: 1,
+                  ),
                 ),
                 child: Icon(
-                  Icons.star_rounded,
+              Icons.star_rounded,
                   size: iconSize,
-                  color: Colors.amber[600],
-                ),
+              color: Colors.amber[600],
+            ),
               ),
-              SizedBox(height: isSmallScreen ? 20 : 24),
+              SizedBox(height: isSmallScreen ? 24 : 28),
 
-              // Title
-              Text(
-                'How was your experience?',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
+              // Title with better typography
+            Text(
+              'How was your experience?',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
                   fontSize: titleSize,
                   color: isDark ? Colors.white : Colors.black87,
-                ),
-                textAlign: TextAlign.center,
               ),
-              SizedBox(height: isSmallScreen ? 8 : 12),
+                textAlign: TextAlign.center,
+            ),
+              SizedBox(height: isSmallScreen ? 12 : 16),
 
-              // Subtitle
-              Text(
-                'Your feedback helps us improve iFound for everyone',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              // Subtitle with better messaging
+            Text(
+              'Your feedback helps us improve iFound for everyone',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: isDark ? Colors.white70 : Colors.black54,
                   fontSize: bodySize,
-                ),
-                textAlign: TextAlign.center,
+                  height: 1.4,
               ),
-              SizedBox(height: isSmallScreen ? 28 : 36),
+              textAlign: TextAlign.center,
+            ),
+              SizedBox(height: isSmallScreen ? 32 : 40),
 
-              // Star rating
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(5, (index) {
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() => _selectedRating = index + 1);
-                      HapticFeedback.lightImpact();
-                    },
+              // Star rating with better interaction
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(5, (index) {
+                return GestureDetector(
+                  onTap: () {
+                      setState(() {
+                        _selectedRating = index + 1;
+                      });
+                    HapticFeedback.lightImpact();
+                  },
                     child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 6 : 8),
-                      child: Icon(
-                        index < _selectedRating ? Icons.star_rounded : Icons.star_outline_rounded,
+                      duration: const Duration(milliseconds: 150),
+                      transform: Matrix4.identity()..scale(index < _selectedRating ? 1.1 : 1.0),
+                      padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 8 : 10),
+                    child: Icon(
+                      index < _selectedRating ? Icons.star_rounded : Icons.star_outline_rounded,
                         size: starSize,
-                        color: index < _selectedRating ? Colors.amber[600] : Colors.grey[400],
-                      ),
+                      color: index < _selectedRating ? Colors.amber[600] : Colors.grey[400],
                     ),
-                  );
-                }),
-              ),
+                  ),
+                );
+              }),
+            ),
 
-              // Rating text
-              if (_selectedRating > 0) ...[
-                SizedBox(height: isSmallScreen ? 16 : 20),
-                Container(
+              // Rating text with better styling
+            if (_selectedRating > 0) ...[
+                SizedBox(height: isSmallScreen ? 20 : 24),
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
                   padding: EdgeInsets.symmetric(
-                    horizontal: isSmallScreen ? 16 : 20,
-                    vertical: isSmallScreen ? 8 : 12,
+                    horizontal: isSmallScreen ? 20 : 24,
+                    vertical: isSmallScreen ? 12 : 16,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.amber.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
+                    color: Colors.amber.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(24),
                     border: Border.all(
-                      color: Colors.amber.withOpacity(0.3),
-                      width: 1,
+                      color: Colors.amber.withOpacity(0.4),
+                      width: 1.5,
                     ),
                   ),
                   child: Text(
                     _getRatingText(_selectedRating),
                     style: TextStyle(
                       color: Colors.amber[700],
-                      fontWeight: FontWeight.w600,
-                      fontSize: isSmallScreen ? 14 : 16,
+                      fontWeight: FontWeight.w700,
+                      fontSize: isSmallScreen ? 15 : 17,
                     ),
                   ),
                 ),
               ],
 
-              SizedBox(height: isSmallScreen ? 24 : 32),
+              SizedBox(height: isSmallScreen ? 28 : 36),
 
-              // Feedback section (always visible)
-                Container(
-                  padding: EdgeInsets.all(isSmallScreen ? 16 : 20),
-                  decoration: BoxDecoration(
-                    color: isDark ? Colors.grey[900] : Colors.grey[50],
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
-                      width: 1,
-                    ),
+              // Feedback section with better design
+              Container(
+                padding: EdgeInsets.all(isSmallScreen ? 16 : 20),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.grey[900] : Colors.grey[50],
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
+                    width: 1,
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.chat_bubble_outline_rounded,
-                            color: Theme.of(context).colorScheme.primary,
-                            size: isSmallScreen ? 18 : 20,
-                          ),
-                          SizedBox(width: isSmallScreen ? 8 : 10),
-                          Text(
-                            'Share your thoughts (optional)',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: Theme.of(context).colorScheme.primary,
-                              fontSize: isSmallScreen ? 14 : 16,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: isSmallScreen ? 12 : 16),
-                      TextField(
-                        controller: _feedbackController,
-                        maxLines: 4,
-                        style: TextStyle(
-                          fontSize: isSmallScreen ? 14 : 16,
-                          color: isDark ? Colors.white : Colors.black87,
+                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.chat_bubble_outline_rounded,
+                          color: Theme.of(context).colorScheme.primary,
+                          size: isSmallScreen ? 18 : 20,
                         ),
-                        decoration: InputDecoration(
-                          hintText: 'Tell us what you think about iFound...',
-                          hintStyle: TextStyle(
-                            color: isDark ? Colors.white54 : Colors.black38,
+                        SizedBox(width: isSmallScreen ? 8 : 10),
+                        Text(
+                          'Share your thoughts (optional)',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).colorScheme.primary,
                             fontSize: isSmallScreen ? 14 : 16,
                           ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: Theme.of(context).colorScheme.primary,
-                              width: 2,
-                            ),
-                          ),
-                          filled: true,
-                          fillColor: isDark ? Colors.grey[800] : Colors.white,
-                          contentPadding: EdgeInsets.all(isSmallScreen ? 12 : 16),
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
-                SizedBox(height: isSmallScreen ? 20 : 24),
+                      ],
+              ),
+                    SizedBox(height: isSmallScreen ? 12 : 16),
+              TextField(
+                controller: _feedbackController,
+                maxLines: 4,
+                      style: TextStyle(
+                        fontSize: isSmallScreen ? 14 : 16,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                decoration: InputDecoration(
+                        hintText: 'Tell us what you think about iFound...',
+                        hintStyle: TextStyle(
+                          color: isDark ? Colors.white54 : Colors.black38,
+                          fontSize: isSmallScreen ? 14 : 16,
+                        ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                            color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                            color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 2,
+                          ),
+                        ),
+                        filled: true,
+                        fillColor: isDark ? Colors.grey[800] : Colors.white,
+                        contentPadding: EdgeInsets.all(isSmallScreen ? 16 : 20),
+                ),
+              ),
+                  ],
+                ),
+              ),
+              SizedBox(height: isSmallScreen ? 24 : 32),
 
-              // Action buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
+              // Action buttons with better design
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
                         _feedbackController.clear();
                         _selectedRating = 0;
-                      },
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: isSmallScreen ? 14 : 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                    },
+                    style: TextButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: isSmallScreen ? 16 : 18),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
                       ),
+                    ),
                       child: Text(
                         'Skip',
                         style: TextStyle(
-                          fontSize: isSmallScreen ? 14 : 16,
+                          fontSize: isSmallScreen ? 15 : 17,
                           color: isDark ? Colors.white70 : Colors.black54,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                    ),
                   ),
-                  SizedBox(width: isSmallScreen ? 12 : 16),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: (_selectedRating > 0 || _feedbackController.text.trim().isNotEmpty) ? _submitRating : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.primary,
+                ),
+                  SizedBox(width: isSmallScreen ? 16 : 20),
+                Expanded(
+                  child: ElevatedButton(
+                      onPressed: (_selectedRating > 0 || _feedbackController.text.trim().isNotEmpty) && !_isSubmitting ? _submitRating : null,
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: (_selectedRating > 0 || _feedbackController.text.trim().isNotEmpty) 
+                          ? Theme.of(context).colorScheme.primary 
+                          : Theme.of(context).colorScheme.primary.withOpacity(0.5),
                         foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(vertical: isSmallScreen ? 14 : 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 2,
+                        padding: EdgeInsets.symmetric(vertical: isSmallScreen ? 16 : 18),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
                       ),
-                      child: _isSubmitting
-                          ? SizedBox(
-                              height: isSmallScreen ? 16 : 20,
-                              width: isSmallScreen ? 16 : 20,
-                              child: const CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            )
-                          : Text(
-                              'Submit',
-                              style: TextStyle(
-                                fontSize: isSmallScreen ? 14 : 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
+                        elevation: _isSubmitting ? 0 : 3,
                     ),
+                    child: _isSubmitting
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                height: isSmallScreen ? 18 : 20,
+                                width: isSmallScreen ? 18 : 20,
+                                child: const CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
+                              ),
+                              SizedBox(width: isSmallScreen ? 10 : 12),
+                              Text(
+                                'Submitting...',
+                                style: TextStyle(
+                                  fontSize: isSmallScreen ? 15 : 17,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          )
+                        : Text(
+                            _selectedRating > 0 ? 'Submit Rating' : 'Submit',
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? 15 : 17,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                   ),
-                ],
-              ),
-              SizedBox(height: isSmallScreen ? 16 : 20),
-            ],
+                ),
+              ],
+            ),
+              SizedBox(height: isSmallScreen ? 20 : 24),
+          ],
           ),
         ),
       ),
@@ -338,11 +366,43 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
     final user = FirebaseAuth.instance.currentUser;
 
     try {
+      // Show immediate feedback with better UX
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Text('Submitting your feedback...'),
+              ],
+            ),
+            backgroundColor: Colors.blue[600],
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            duration: const Duration(seconds: 1),
+          ),
+        );
+      }
+
+      // Use timeout to prevent hanging
       await _firestoreService.addFeedback(
         userId: user?.uid ?? 'anonymous',
         feedback: _feedbackController.text.trim(),
         rating: _selectedRating,
         userName: user?.displayName ?? 'Anonymous',
+      ).timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          throw Exception('Request timed out. Please try again.');
+        },
       );
 
       if (mounted) {
@@ -350,23 +410,38 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
         _feedbackController.clear();
         _selectedRating = 0;
 
+        // Show success message with better UX
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Thank you for your feedback!'),
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white, size: 20),
+                const SizedBox(width: 12),
+                const Text('Thank you for your feedback!'),
+              ],
+            ),
             backgroundColor: Colors.green[600],
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            duration: const Duration(seconds: 2),
           ),
         );
       }
-    } catch (e) {
+      } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to submit feedback: ${e.toString()}'),
+            content: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.white, size: 20),
+                const SizedBox(width: 12),
+                Text('Failed to submit feedback. Please try again.'),
+              ],
+            ),
             backgroundColor: Colors.red[600],
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -412,25 +487,25 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
             children: [
               Expanded(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Community Impact',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Community Impact',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
                         fontSize: titleSize,
-                      ),
                     ),
+                  ),
                     SizedBox(height: isSmallScreen ? 2 : 4),
-                    Text(
-                      'Join thousands helping each other',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withOpacity(0.9),
+                  Text(
+                    'Join thousands helping each other',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.white.withOpacity(0.9),
                         fontSize: bodySize,
-                      ),
                     ),
-                  ],
+                  ),
+                ],
                 ),
               ),
               Container(
@@ -501,7 +576,13 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
     final rating = data['rating'] ?? 0;
     final feedback = data['feedback'] ?? '';
     final userName = data['userName'] ?? 'Anonymous';
-    final timestamp = data['timestamp'] as Timestamp?;
+    final timestampRaw = data['timestamp'];
+    DateTime? dateTime;
+    if (timestampRaw is Timestamp) {
+      dateTime = timestampRaw.toDate();
+    } else if (timestampRaw is String) {
+      dateTime = DateTime.tryParse(timestampRaw);
+    }
     final likes = List<String>.from(data['likes'] ?? []);
     final replies = List<Map<String, dynamic>>.from(data['replies'] ?? []);
     final feedbackId = data['id'] ?? '';
@@ -552,9 +633,9 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
                             fontSize: titleSize,
                           ),
                         ),
-                        if (timestamp != null)
+                        if (dateTime != null)
                           Text(
-                            _formatTimestamp(timestamp),
+                            _formatTimestamp(dateTime),
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6),
                               fontSize: isSmallScreen ? 12 : 14,
@@ -594,65 +675,65 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
                   // Like button
                   Flexible(
                     child: GestureDetector(
-                      onTap: () {
-                        if (currentUser != null) {
-                          _firestoreService.toggleFeedbackLike(
-                            feedbackId: feedbackId,
-                            userId: currentUser.uid,
-                          );
-                          HapticFeedback.lightImpact();
-                        }
-                      },
-                      child: Row(
+                    onTap: () {
+                      if (currentUser != null) {
+                        _firestoreService.toggleFeedbackLike(
+                          feedbackId: feedbackId,
+                          userId: currentUser.uid,
+                        );
+                        HapticFeedback.lightImpact();
+                      }
+                    },
+                    child: Row(
                         mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                      children: [
+                        Icon(
+                          isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
                             size: iconSize,
-                            color: isLiked ? Colors.red[600] : Colors.grey[600],
-                          ),
+                          color: isLiked ? Colors.red[600] : Colors.grey[600],
+                        ),
                           SizedBox(width: isSmallScreen ? 3 : 4),
                           Flexible(
                             child: Text(
-                              '${likes.length}',
-                              style: TextStyle(
-                                color: isLiked ? Colors.red[600] : Colors.grey[600],
-                                fontWeight: FontWeight.w500,
+                          '${likes.length}',
+                          style: TextStyle(
+                            color: isLiked ? Colors.red[600] : Colors.grey[600],
+                            fontWeight: FontWeight.w500,
                                 fontSize: isSmallScreen ? 13 : 14,
                               ),
                               overflow: TextOverflow.ellipsis,
-                            ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
+                  ),
                   ),
                   SizedBox(width: isSmallScreen ? 16 : 24),
                   // Reply button
                   Flexible(
                     child: GestureDetector(
-                      onTap: () => _showReplyDialog(feedbackId, userName),
-                      child: Row(
+                    onTap: () => _showReplyDialog(feedbackId, userName),
+                    child: Row(
                         mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.reply_rounded,
+                      children: [
+                        Icon(
+                          Icons.reply_rounded,
                             size: iconSize,
-                            color: Colors.grey[600],
-                          ),
+                          color: Colors.grey[600],
+                        ),
                           SizedBox(width: isSmallScreen ? 3 : 4),
                           Flexible(
                             child: Text(
-                              '${replies.length}',
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontWeight: FontWeight.w500,
+                          '${replies.length}',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w500,
                                 fontSize: isSmallScreen ? 13 : 14,
                               ),
                               overflow: TextOverflow.ellipsis,
-                            ),
                           ),
-                        ],
+                        ),
+                      ],
                       ),
                     ),
                   ),
@@ -714,9 +795,9 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
             children: [
               Flexible(
                 child: Text(
-                  replyUserName,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.bold,
+                replyUserName,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.bold,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -725,9 +806,9 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
               if (replyTimestamp != null)
                 Flexible(
                   child: Text(
-                    _formatTimestamp(replyTimestamp),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6),
+                  _formatTimestamp(replyTimestamp.toDate()),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6),
                       fontSize: isSmallScreen ? 11 : 13,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -771,47 +852,47 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
             right: 20,
           ),
           child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[400],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[400],
+                  borderRadius: BorderRadius.circular(2),
                 ),
-                const SizedBox(height: 20),
-                Text(
-                  'Reply to $originalUserName',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Reply to $originalUserName',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
                     fontSize: isSmallScreen ? 18 : 22,
-                  ),
                 ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: replyController,
-                  maxLines: 3,
-                  decoration: InputDecoration(
-                    labelText: 'Your reply',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: replyController,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  labelText: 'Your reply',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                     prefixIcon: Icon(Icons.reply_rounded, size: isSmallScreen ? 20 : 24),
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: isSmallScreen ? 12 : 16,
                       vertical: isSmallScreen ? 12 : 16,
                     ),
-                  ),
                 ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
                         style: TextButton.styleFrom(
                           padding: EdgeInsets.symmetric(vertical: isSmallScreen ? 12 : 16),
                           shape: RoundedRectangleBorder(
@@ -822,61 +903,61 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
                           'Cancel',
                           style: TextStyle(fontSize: isSmallScreen ? 14 : 16),
                         ),
-                      ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: replyController.text.trim().isEmpty ? null : () async {
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: replyController.text.trim().isEmpty ? null : () async {
                           final navigator = Navigator.of(context);
                           final scaffoldMessenger = ScaffoldMessenger.of(context);
-                          try {
-                            await _firestoreService.addFeedbackReply(
-                              feedbackId: feedbackId,
-                              userId: currentUser?.uid ?? 'anonymous',
-                              reply: replyController.text.trim(),
-                              userName: currentUser?.displayName ?? 'Anonymous',
-                            );
-                            if (mounted) {
+                        try {
+                          await _firestoreService.addFeedbackReply(
+                            feedbackId: feedbackId,
+                            userId: currentUser?.uid ?? 'anonymous',
+                            reply: replyController.text.trim(),
+                            userName: currentUser?.displayName ?? 'Anonymous',
+                          );
+                          if (mounted) {
                               navigator.pop();
                               scaffoldMessenger.showSnackBar(
-                                SnackBar(
-                                  content: const Text('Reply posted successfully!'),
-                                  backgroundColor: Colors.green[600],
-                                  behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                ),
-                              );
-                            }
-                          } catch (e) {
-                            if (mounted) {
-                              scaffoldMessenger.showSnackBar(
-                                SnackBar(
-                                  content: Text('Failed to post reply: ${e.toString()}'),
-                                  backgroundColor: Colors.red[600],
-                                  behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                ),
-                              );
-                            }
+                              SnackBar(
+                                content: const Text('Reply posted successfully!'),
+                                backgroundColor: Colors.green[600],
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                            );
                           }
-                        },
-                        style: ElevatedButton.styleFrom(
+                        } catch (e) {
+                          if (mounted) {
+                              scaffoldMessenger.showSnackBar(
+                              SnackBar(
+                                content: Text('Failed to post reply: ${e.toString()}'),
+                                backgroundColor: Colors.red[600],
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          );
+        }
+      }
+                      },
+                      style: ElevatedButton.styleFrom(
                           padding: EdgeInsets.symmetric(vertical: isSmallScreen ? 12 : 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
+                      ),
                         child: Text(
                           'Post Reply',
                           style: TextStyle(fontSize: isSmallScreen ? 14 : 16),
                         ),
-                      ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-              ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+            ],
             ),
           ),
         ),
@@ -884,9 +965,8 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
     );
   }
 
-  String _formatTimestamp(Timestamp timestamp) {
+  String _formatTimestamp(DateTime date) {
     final now = DateTime.now();
-    final date = timestamp.toDate();
     final difference = now.difference(date);
 
     if (difference.inDays > 0) {
@@ -906,7 +986,7 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 400;
     final padding = isSmallScreen ? 16.0 : 20.0;
-
+    
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(

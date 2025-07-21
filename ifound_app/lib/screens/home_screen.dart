@@ -259,12 +259,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           Padding(
                             padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 20 : 0),
                             child: Text(
-                              'You\'ll see notifications here when matches are found.'.tr(),
-                              style: TextStyle(
+                            'You\'ll see notifications here when matches are found.'.tr(),
+                            style: TextStyle(
                                 fontSize: emptySubtitleFontSize,
-                                color: isDark ? Colors.white54 : Colors.grey[500],
-                              ),
-                              textAlign: TextAlign.center,
+                              color: isDark ? Colors.white54 : Colors.grey[500],
+                            ),
+                            textAlign: TextAlign.center,
                             ),
                           ),
                         ],
@@ -605,7 +605,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         Expanded(
           child: _buildMobileActionButton(
             label: 'Report Lost'.tr(),
-            icon: Icons.search_rounded,
+            icon: Icons.find_in_page_outlined,
             color: Colors.red,
             isDark: isDark,
             onTap: () => widget.onTabSelected(1),
@@ -614,9 +614,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
         SizedBox(width: buttonSpacing),
         Expanded(
-          child: _buildMobileActionButton(
+          child: _buildMobileFoundButton(
             label: 'Report Found'.tr(),
-            icon: Icons.check_circle_rounded,
             color: Colors.green,
             isDark: isDark,
             onTap: () => widget.onTabSelected(2),
@@ -624,6 +623,85 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildMobileFoundButton({
+    required String label,
+    required Color color,
+    required bool isDark,
+    required VoidCallback onTap,
+    required bool isSmallScreen,
+  }) {
+    return Container(
+      height: isSmallScreen ? 48 : 56,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            color.withOpacity(0.1),
+            color.withOpacity(0.05),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: color.withOpacity(0.3),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: isSmallScreen ? 8 : 12,
+              vertical: isSmallScreen ? 8 : 12
+            ),
+            child: Center(
+              child: Stack(
+                alignment: Alignment.center,
+              children: [
+                Icon(
+                    Icons.document_scanner_outlined,
+                  color: color,
+                    size: isSmallScreen ? 24 : 28,
+                ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: Colors.green[600],
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isDark ? Colors.grey[800]! : Colors.white,
+                          width: 1,
+                    ),
+                      ),
+                      child: Icon(
+                        Icons.check,
+                        size: (isSmallScreen ? 24 : 28) * 0.4,
+                        color: Colors.white,
+                      ),
+                  ),
+                ),
+              ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -636,7 +714,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     required bool isSmallScreen,
   }) {
     return Container(
-      height: isSmallScreen ? 56 : 64,
+      height: isSmallScreen ? 48 : 56,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -646,7 +724,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: color.withOpacity(0.3),
           width: 1,
@@ -654,54 +732,28 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         boxShadow: [
           BoxShadow(
             color: color.withOpacity(0.1),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
           onTap: onTap,
           child: Container(
             padding: EdgeInsets.symmetric(
-              horizontal: isSmallScreen ? 12 : 20, 
-              vertical: isSmallScreen ? 12 : 16
+              horizontal: isSmallScreen ? 8 : 12,
+              vertical: isSmallScreen ? 8 : 12
             ),
-            child: isSmallScreen 
-              ? Center(
-                  child: Icon(
-                    icon,
-                    color: color,
-                    size: 24,
-                  ),
-                )
-              : Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      icon,
-                      color: color,
-                      size: 20,
-                    ),
-                    const SizedBox(height: 4),
-                    Flexible(
-                      child: Text(
-                        label,
-                        style: GoogleFonts.poppins(
-                          color: color,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
-                        ),
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
+            child: Center(
+              child: Icon(
+                icon,
+                color: color,
+                size: isSmallScreen ? 24 : 28,
+              ),
+            ),
           ),
         ),
       ),
@@ -976,9 +1028,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           itemBuilder: (context, index) {
             final doc = docs[index];
             final data = doc.data() as Map<String, dynamic>;
-            final timestamp = data['timestamp'] as Timestamp?;
-            final timeAgo =
-                timestamp != null ? _getTimeAgo(timestamp.toDate()) : '';
+            final timestampRaw = data['timestamp'];
+            DateTime? dateTime;
+            if (timestampRaw is Timestamp) {
+              dateTime = timestampRaw.toDate();
+            } else if (timestampRaw is String) {
+              dateTime = DateTime.tryParse(timestampRaw);
+            }
+            final timeAgo = dateTime != null ? _getTimeAgo(dateTime) : '';
 
             return Container(
               margin: const EdgeInsets.only(bottom: 12),

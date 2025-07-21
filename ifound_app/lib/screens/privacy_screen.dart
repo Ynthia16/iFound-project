@@ -44,7 +44,7 @@ class PrivacyScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(isSmallScreen ? 12 : 16),
                       ),
                       child: Icon(
-                        Icons.lock_rounded,
+                        Icons.lock_rounded, 
                         color: const Color(0xFF2196F3),
                         size: iconSize,
                       ),
@@ -91,7 +91,7 @@ class PrivacyScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(isSmallScreen ? 12 : 16),
                       ),
                       child: Icon(
-                        Icons.verified_user_rounded,
+                        Icons.verified_user_rounded, 
                         color: const Color(0xFF2196F3),
                         size: iconSize,
                       ),
@@ -138,7 +138,7 @@ class PrivacyScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(isSmallScreen ? 12 : 16),
                       ),
                       child: Icon(
-                        Icons.shield_rounded,
+                        Icons.shield_rounded, 
                         color: const Color(0xFF2196F3),
                         size: iconSize,
                       ),
@@ -175,4 +175,4 @@ class PrivacyScreen extends StatelessWidget {
       ),
     );
   }
-}
+} 

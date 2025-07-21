@@ -10,63 +10,80 @@ class AdminService {
       final usersSnapshot = await _firestore.collection('users').get();
       final totalUsers = usersSnapshot.docs.length;
 
-      // Getting active reports
-      final activeReportsSnapshot = await _firestore
-          .collection('reports')
-          .where('status', isEqualTo: 'active')
-          .get();
-      final activeReports = activeReportsSnapshot.docs.length;
+      // Getting all reports for detailed analysis
+      final allReportsSnapshot = await _firestore.collection('reports').get();
+      final allReports = allReportsSnapshot.docs;
 
-      // Getting matches made
-      final matchesSnapshot = await _firestore
-          .collection('reports')
-          .where('status', isEqualTo: 'matched')
-          .get();
-      final matchesMade = matchesSnapshot.docs.length;
+      // Calculate different report statuses
+      int activeReports = 0;
+      int matchedReports = 0;
+      int resolvedReports = 0;
+      int lostReports = 0;
+      int foundReports = 0;
+      int todayReports = 0;
 
-      // Getting today's reports
       final today = DateTime.now();
       final startOfDay = DateTime(today.year, today.month, today.day);
-      final todayReportsSnapshot = await _firestore
-          .collection('reports')
-          .where('createdAt', isGreaterThanOrEqualTo: startOfDay)
-          .get();
-      final todayReports = todayReportsSnapshot.docs.length;
 
-      // Getting pending reports
-      final pendingReportsSnapshot = await _firestore
-          .collection('reports')
-          .where('status', isEqualTo: 'pending')
-          .get();
-      final pendingReports = pendingReportsSnapshot.docs.length;
+      for (final doc in allReports) {
+        final data = doc.data();
+        final status = data['status']?.toString().toLowerCase() ?? '';
+        final timestamp = data['timestamp'];
+        
+        // Count by status
+        if (status == 'lost') {
+          lostReports++;
+        } else if (status == 'found') {
+          foundReports++;
+        }
 
-      // Getting reports by type
-      final lostReportsSnapshot = await _firestore
-          .collection('reports')
-          .where('type', isEqualTo: 'lost')
-          .get();
-      final lostReports = lostReportsSnapshot.docs.length;
+        // Check if report is matched (has matchScore or is marked as matched)
+        if (data['matchScore'] != null || data['isMatched'] == true || data['status'] == 'matched') {
+          matchedReports++;
+        }
 
-      final foundReportsSnapshot = await _firestore
-          .collection('reports')
-          .where('type', isEqualTo: 'found')
-          .get();
-      final foundReports = foundReportsSnapshot.docs.length;
+        // Check if report is resolved (claimed or closed)
+        if (data['status'] == 'claimed' || data['status'] == 'closed' || data['isResolved'] == true) {
+          resolvedReports++;
+        } else {
+          activeReports++;
+        }
 
-      // Calculating success rate
+        // Count today's reports
+        if (timestamp != null) {
+          DateTime? reportDate;
+          if (timestamp is Timestamp) {
+            reportDate = timestamp.toDate();
+          } else if (timestamp is String) {
+            reportDate = DateTime.tryParse(timestamp);
+          } else if (timestamp is int) {
+            reportDate = DateTime.fromMillisecondsSinceEpoch(timestamp);
+          }
+          
+          if (reportDate != null && reportDate.isAfter(startOfDay)) {
+            todayReports++;
+          }
+        }
+      }
+
+      // Calculate success rate (matches / total reports)
       final totalReports = lostReports + foundReports;
-      final successRate = totalReports > 0 ? (matchesMade / totalReports * 100).round() : 0;
+      final successRate = totalReports > 0 ? (matchedReports / totalReports * 100).round() : 0;
+
+      // Calculate resolution rate
+      final resolutionRate = totalReports > 0 ? (resolvedReports / totalReports * 100).round() : 0;
 
       return {
         'totalUsers': totalUsers,
         'activeReports': activeReports,
-        'matchesMade': matchesMade,
+        'matchedReports': matchedReports,
+        'resolvedReports': resolvedReports,
         'todayReports': todayReports,
-        'pendingReports': pendingReports,
         'lostReports': lostReports,
         'foundReports': foundReports,
         'totalReports': totalReports,
         'successRate': successRate,
+        'resolutionRate': resolutionRate,
         'lastUpdated': DateTime.now().toIso8601String(),
       };
     } catch (e) {
@@ -74,13 +91,14 @@ class AdminService {
       return {
         'totalUsers': 0,
         'activeReports': 0,
-        'matchesMade': 0,
+        'matchedReports': 0,
+        'resolvedReports': 0,
         'todayReports': 0,
-        'pendingReports': 0,
         'lostReports': 0,
         'foundReports': 0,
         'totalReports': 0,
         'successRate': 0,
+        'resolutionRate': 0,
         'lastUpdated': DateTime.now().toIso8601String(),
       };
     }

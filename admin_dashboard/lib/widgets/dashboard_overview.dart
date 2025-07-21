@@ -156,7 +156,13 @@ class _DashboardOverviewState extends State<DashboardOverview> {
                   if (constraints.maxWidth < 1200) crossAxisCount = 3;
                   if (constraints.maxWidth < 900) crossAxisCount = 2;
                   if (constraints.maxWidth < 600) crossAxisCount = 1;
-                  
+                  final totalReports = int.tryParse(_stats['totalReports']?.toString() ?? '0') ?? 0;
+                  final lostReports = int.tryParse(_stats['lostReports']?.toString() ?? '0') ?? 0;
+                  final foundReports = int.tryParse(_stats['foundReports']?.toString() ?? '0') ?? 0;
+                  final resolvedReports = int.tryParse(_stats['resolvedReports']?.toString() ?? '0') ?? 0;
+                  final lostPercent = totalReports > 0 ? ((lostReports / totalReports) * 100).toStringAsFixed(1) : '0.0';
+                  final foundPercent = totalReports > 0 ? ((foundReports / totalReports) * 100).toStringAsFixed(1) : '0.0';
+                  final resolvedPercent = totalReports > 0 ? ((resolvedReports / totalReports) * 100).toStringAsFixed(1) : '0.0';
                   return GridView.count(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
@@ -172,22 +178,34 @@ class _DashboardOverviewState extends State<DashboardOverview> {
                         Colors.blue,
                       ),
                       _buildStatCard(
-                        'Active Reports',
-                        _stats['activeReports']?.toString() ?? '0',
-                        Icons.assignment,
-                        Colors.orange,
+                        'Lost Reports',
+                        '${_stats['lostReports']?.toString() ?? '0'}  ($lostPercent%)',
+                        Icons.assignment_late,
+                        Colors.red,
                       ),
                       _buildStatCard(
-                        'Matches Made',
-                        _stats['matchesMade']?.toString() ?? '0',
-                        Icons.check_circle,
+                        'Found Reports',
+                        '${_stats['foundReports']?.toString() ?? '0'}  ($foundPercent%)',
+                        Icons.assignment_turned_in,
                         Colors.green,
+                      ),
+                      _buildStatCard(
+                        'Resolved Cases',
+                        '${_stats['resolvedReports']?.toString() ?? '0'}  ($resolvedPercent%)',
+                        Icons.check_circle,
+                        Colors.teal,
                       ),
                       _buildStatCard(
                         'Today\'s Reports',
                         _stats['todayReports']?.toString() ?? '0',
                         Icons.today,
                         Colors.purple,
+                      ),
+                      _buildStatCard(
+                        'Success Rate',
+                        '${_stats['successRate']?.toString() ?? '0'}%',
+                        Icons.trending_up,
+                        Colors.indigo,
                       ),
                     ],
                   );

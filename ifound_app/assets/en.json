@@ -98,6 +98,9 @@
   "Join thousands helping each other": "Join thousands helping each other",
   "Documents Found": "Documents Found",
   "Happy Users": "Happy Users",
+  "No lost reports yet": "No lost reports yet",
+  "Be the first to report a lost document!": "Be the first to report a lost document!",
+  "✅ Account created successfully! Please sign in.": "✅ Account created successfully! Please sign in.",
   "Success Rate": "Success Rate",
   "Be the first to share your experience!": "Be the first to share your experience!",
   "Your feedback helps us improve iFound": "Your feedback helps us improve iFound",
@@ -248,6 +251,12 @@
   "Check your email for match notifications": "Check your email for match notifications",
   "sign_in_to_continue": "Sign in to continue",
   "sign_in": "Sign In",
+  "Language & Region": "Language & Region",
+  "Share location in reports": "Share location in reports",
+  "Support & Help": "Support & Help",
+  "Lost": "Lost",
+  "Found": "Found",
+  "Rate": "Rate",
   "or": "or",
   "signing_in_with_google": "Signing in with Google...",
   "sign_up": "Sign Up",
@@ -278,5 +287,8 @@
   "Logout": "Logout",
   "Loading settings...": "Loading settings...",
   "Notifications": "Notifications",
-  "Close": "Close"
+  "Close": "Close",
+  "✅ Lost document report submitted successfully!": "✅ Lost document report submitted successfully!",
+  "No found reports yet": "No found reports yet",
+  "Be the first to report a found document": "Be the first to report a found document"
 } 

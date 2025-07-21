@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../components/safety_guidelines.dart';
 import 'help_faq_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -69,7 +70,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
 
     if (mounted) {
-      context.setLocale(Locale(languageCode));
+    context.setLocale(Locale(languageCode));
     }
   }
 
@@ -92,14 +93,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (context) => AlertDialog(
         title: Text(
           'language'.tr(),
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+          style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
               leading: const Icon(Icons.language, size: 24),
-              title: const Text('English', style: TextStyle(fontSize: 16)),
+              title: Text('English', style: GoogleFonts.poppins(fontSize: 16)),
               trailing: _language == 'en'
                   ? const Icon(Icons.check, color: Colors.green, size: 24)
                   : null,
@@ -108,10 +109,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _changeLanguage('en');
               },
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              minVerticalPadding: 16, // Ensures 48dp height
             ),
             ListTile(
               leading: const Icon(Icons.language, size: 24),
-              title: const Text('Français', style: TextStyle(fontSize: 16)),
+              title: Text('Français', style: GoogleFonts.poppins(fontSize: 16)),
               trailing: _language == 'fr'
                   ? const Icon(Icons.check, color: Colors.green, size: 24)
                   : null,
@@ -120,10 +122,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _changeLanguage('fr');
               },
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              minVerticalPadding: 16,
             ),
             ListTile(
               leading: const Icon(Icons.language, size: 24),
-              title: const Text('Kinyarwanda', style: TextStyle(fontSize: 16)),
+              title: Text('Kinyarwanda', style: GoogleFonts.poppins(fontSize: 16)),
               trailing: _language == 'rw'
                   ? const Icon(Icons.check, color: Colors.green, size: 24)
                   : null,
@@ -132,13 +135,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _changeLanguage('rw');
               },
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              minVerticalPadding: 16,
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('Cancel'.tr(), style: const TextStyle(fontSize: 16)),
+            child: Text('Cancel'.tr(), style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -345,35 +349,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   _buildSectionHeader('Language & Region'.tr(), isSmallScreen),
                   _buildSettingTile(
-                    icon: Icons.language_rounded,
-                    title: 'language'.tr(),
-                    subtitle: _getLanguageName(_language),
-                    onTap: _showLanguageDialog,
-                    isDark: isDark,
+                        icon: Icons.language_rounded,
+                        title: 'language'.tr(),
+                        subtitle: _getLanguageName(_language),
+                        onTap: _showLanguageDialog,
+                        isDark: isDark,
                     isSmallScreen: isSmallScreen,
-                  ),
+                      ),
                   SizedBox(height: isSmallScreen ? 6 : 8),
                   _buildSettingTile(
                     icon: Icons.palette_rounded,
-                    title: 'dark_mode'.tr(),
-                    subtitle: 'Customize app appearance'.tr(),
-                    onTap: _showThemeDialog,
+                        title: 'dark_mode'.tr(),
+                        subtitle: 'Customize app appearance'.tr(),
+                        onTap: _showThemeDialog,
                     isDark: isDark,
                     isSmallScreen: isSmallScreen,
                   ),
                   SizedBox(height: isSmallScreen ? 20 : 24),
-
+                  
                   _buildSectionHeader('Notifications'.tr(), isSmallScreen),
                   SwitchListTile(
-                    value: _pushNotifications,
+                        value: _pushNotifications,
                     onChanged: (value) {
-                      setState(() => _pushNotifications = value);
+                          setState(() => _pushNotifications = value);
                       _saveSetting('push_notifications', value);
-                    },
+                        },
                     title: Text(
                       'Push Notifications'.tr(),
                       style: TextStyle(fontSize: isSmallScreen ? 15 : 16),
-                    ),
+                      ),
                     subtitle: Text(
                       'Receive app notifications'.tr(),
                       style: TextStyle(fontSize: isSmallScreen ? 13 : 14),
@@ -389,11 +393,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                   ),
                   SwitchListTile(
-                    value: _emailNotifications,
+                        value: _emailNotifications,
                     onChanged: (value) {
-                      setState(() => _emailNotifications = value);
+                          setState(() => _emailNotifications = value);
                       _saveSetting('email_notifications', value);
-                    },
+                        },
                     title: Text(
                       'Email Notifications'.tr(),
                       style: TextStyle(fontSize: isSmallScreen ? 15 : 16),
@@ -410,21 +414,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: isSmallScreen ? 12 : 16,
                       vertical: isSmallScreen ? 8 : 12,
-                    ),
+                      ),
                   ),
                   SizedBox(height: isSmallScreen ? 20 : 24),
 
                   _buildSectionHeader('Privacy & Safety'.tr(), isSmallScreen),
                   SwitchListTile(
-                    value: _locationSharing,
+                        value: _locationSharing,
                     onChanged: (value) {
-                      setState(() => _locationSharing = value);
+                          setState(() => _locationSharing = value);
                       _saveSetting('location_sharing', value);
-                    },
+                        },
                     title: Text(
                       'Location Sharing'.tr(),
                       style: TextStyle(fontSize: isSmallScreen ? 15 : 16),
-                    ),
+                      ),
                     subtitle: Text(
                       'Share location in reports'.tr(),
                       style: TextStyle(fontSize: isSmallScreen ? 13 : 14),
@@ -440,15 +444,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                   ),
                   SwitchListTile(
-                    value: _dataAnalytics,
+                        value: _dataAnalytics,
                     onChanged: (value) {
-                      setState(() => _dataAnalytics = value);
+                          setState(() => _dataAnalytics = value);
                       _saveSetting('data_analytics', value);
-                    },
+                        },
                     title: Text(
                       'Data Analytics'.tr(),
                       style: TextStyle(fontSize: isSmallScreen ? 15 : 16),
-                    ),
+                      ),
                     subtitle: Text(
                       'Help improve the app'.tr(),
                       style: TextStyle(fontSize: isSmallScreen ? 13 : 14),
@@ -473,18 +477,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     isSmallScreen: isSmallScreen,
                   ),
                   SizedBox(height: isSmallScreen ? 20 : 24),
-
+                  
                   _buildSectionHeader('Security'.tr(), isSmallScreen),
                   SwitchListTile(
-                    value: _biometricAuth,
+                        value: _biometricAuth,
                     onChanged: (value) {
-                      setState(() => _biometricAuth = value);
+                          setState(() => _biometricAuth = value);
                       _saveSetting('biometric_auth', value);
-                    },
+                        },
                     title: Text(
                       'Biometric Authentication'.tr(),
                       style: TextStyle(fontSize: isSmallScreen ? 15 : 16),
-                    ),
+                      ),
                     subtitle: Text(
                       'Use fingerprint or face ID'.tr(),
                       style: TextStyle(fontSize: isSmallScreen ? 13 : 14),
@@ -500,15 +504,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                   ),
                   SwitchListTile(
-                    value: _twoFactorAuth,
+                        value: _twoFactorAuth,
                     onChanged: (value) {
-                      setState(() => _twoFactorAuth = value);
+                          setState(() => _twoFactorAuth = value);
                       _saveSetting('two_factor_auth', value);
-                    },
+                        },
                     title: Text(
                       'Two-Factor Authentication'.tr(),
                       style: TextStyle(fontSize: isSmallScreen ? 15 : 16),
-                    ),
+                  ),
                     subtitle: Text(
                       'Add extra security layer'.tr(),
                       style: TextStyle(fontSize: isSmallScreen ? 13 : 14),
@@ -528,33 +532,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   _buildSectionHeader('Support & Help'.tr(), isSmallScreen),
                   _buildSettingTile(
                     icon: Icons.help_rounded,
-                    title: 'Help & FAQ'.tr(),
-                    subtitle: 'Get help and answers'.tr(),
+                        title: 'Help & FAQ'.tr(),
+                        subtitle: 'Get help and answers'.tr(),
                     onTap: () => Navigator.push(
                       context,
-                      MaterialPageRoute(
+                            MaterialPageRoute(
                         builder: (context) => const HelpFAQScreen(),
-                      ),
+                            ),
                     ),
                     isDark: isDark,
                     isSmallScreen: isSmallScreen,
                   ),
                   SizedBox(height: isSmallScreen ? 20 : 24),
-
+                  
                   _buildSectionHeader('Data Management'.tr(), isSmallScreen),
                   _buildSettingTile(
-                    icon: Icons.download_rounded,
-                    title: 'Export Data'.tr(),
-                    subtitle: 'Download your data'.tr(),
-                    onTap: _exportData,
-                    isDark: isDark,
+                        icon: Icons.download_rounded,
+                        title: 'Export Data'.tr(),
+                        subtitle: 'Download your data'.tr(),
+                        onTap: _exportData,
+                        isDark: isDark,
                     isSmallScreen: isSmallScreen,
-                  ),
+                      ),
                   _buildSettingTile(
-                    icon: Icons.delete_forever_rounded,
-                    title: 'Delete Account'.tr(),
+                        icon: Icons.delete_forever_rounded,
+                        title: 'Delete Account'.tr(),
                     subtitle: 'Permanently delete account'.tr(),
-                    onTap: _deleteAccount,
+                        onTap: _deleteAccount,
                     isDark: isDark,
                     isSmallScreen: isSmallScreen,
                     isDestructive: true,
@@ -570,13 +574,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Padding(
       padding: EdgeInsets.only(bottom: isSmallScreen ? 10 : 12, top: isSmallScreen ? 6 : 8),
       child: Text(
-        title,
-        style: TextStyle(
+          title,
+          style: GoogleFonts.poppins(
           fontSize: isSmallScreen ? 16 : 18,
           fontWeight: FontWeight.w700,
           color: const Color(0xFF2196F3),
+          ),
         ),
-      ),
     );
   }
 
@@ -607,22 +611,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
           icon,
           color: isDestructive ? Colors.red : const Color(0xFF2196F3),
           size: isSmallScreen ? 20 : 24,
-        ),
-        title: Text(
-          title,
-          style: TextStyle(
+      ),
+      title: Text(
+        title,
+        style: GoogleFonts.poppins(
             fontSize: isSmallScreen ? 15 : 16,
             fontWeight: FontWeight.w600,
             color: isDestructive ? Colors.red : (isDark ? Colors.white : Colors.black87),
-          ),
         ),
-        subtitle: Text(
-          subtitle,
-          style: TextStyle(
+      ),
+      subtitle: Text(
+        subtitle,
+        style: GoogleFonts.poppins(
             fontSize: isSmallScreen ? 13 : 14,
-            color: isDark ? Colors.white70 : Colors.grey[600],
-          ),
+          color: isDark ? Colors.white70 : Colors.grey[600],
         ),
+      ),
         trailing: const Icon(
           Icons.chevron_right_rounded,
           color: Color(0xFF2196F3),

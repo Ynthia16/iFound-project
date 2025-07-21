@@ -29,9 +29,14 @@ class AuthService {
         password: password,
       );
       
-      // Update user profile in Firestore
+      // Update user profile in Firestore if needed
       if (credential.user != null) {
-        await _updateUserProfile(credential.user!);
+        await FirestoreService().setUserProfile(
+          userId: credential.user!.uid,
+          name: credential.user!.displayName ?? credential.user!.email?.split('@')[0] ?? 'User',
+          email: credential.user!.email ?? '',
+          photoUrl: credential.user!.photoURL,
+        );
       }
       
       return credential;
@@ -45,20 +50,44 @@ class AuthService {
   // Sign up with email and password
   Future<UserCredential?> createUserWithEmailAndPassword(String email, String password, String name) async {
     try {
+      // Validate inputs
+      if (email.trim().isEmpty || password.trim().isEmpty || name.trim().isEmpty) {
+        throw 'All fields are required';
+      }
+      
+      if (name.trim().split(' ').length < 2) {
+        throw 'Please enter your full name (first and last name)';
+      }
+      
       final credential = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
+        email: email.trim(),
+        password: password.trim(),
       );
       
-      // Update display name
+      // Update display name and save to Firestore
       if (credential.user != null) {
-        await credential.user!.updateDisplayName(name);
-        await _updateUserProfile(credential.user!);
+        await credential.user!.updateDisplayName(name.trim());
+        
+        // Save user profile to Firestore with the provided name and email
+        await FirestoreService().setUserProfile(
+          userId: credential.user!.uid,
+          name: name.trim(), // Use the provided name
+          email: email.trim(), // Use the provided email
+          photoUrl: credential.user!.photoURL,
+        );
+        
+        // Verify the data was saved
+        final savedUser = await FirestoreService().getUserProfile(credential.user!.uid);
+        if (savedUser == null || savedUser['name']?.toString().isEmpty == true) {
+          throw 'Failed to save user profile. Please try again.';
+        }
       }
       
       return credential;
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
+    } catch (e) {
+      throw 'Registration failed: $e';
     }
   }
 
@@ -92,7 +121,12 @@ class AuthService {
       
       // Update user profile in Firestore
       if (userCredential.user != null) {
-        await _updateUserProfile(userCredential.user!);
+        await FirestoreService().setUserProfile(
+          userId: userCredential.user!.uid,
+          name: googleUser.displayName ?? googleUser.email.split('@')[0],
+          email: googleUser.email,
+          photoUrl: googleUser.photoUrl,
+        );
       }
       
       return userCredential;
@@ -155,23 +189,6 @@ class AuthService {
       }
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
-    }
-  }
-
-  // Update user profile in Firestore
-  Future<void> _updateUserProfile(User user) async {
-    try {
-      await FirestoreService().setUserProfile(
-        userId: user.uid,
-        name: user.displayName ?? '',
-        email: user.email ?? '',
-        photoUrl: user.photoURL,
-      );
-    } catch (e) {
-      if (kDebugMode) {
-        print('Failed to update user profile: $e');
-      }
-      // Don't throw error as this is not critical for authentication
     }
   }
 

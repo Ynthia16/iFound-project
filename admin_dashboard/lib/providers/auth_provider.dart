@@ -9,6 +9,7 @@ class AuthProvider with ChangeNotifier {
   User? _user;
   bool _isAdmin = false;
   bool _isLoading = false;
+  bool _isRegistering = false; // Add flag to track registration state
   String? _userName;
 
   User? get user => _user;
@@ -16,6 +17,7 @@ class AuthProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isAuthenticated => _user != null;
   String? get userName => _userName;
+  bool get isRegistering => _isRegistering; // Getter for registration state
 
   AuthProvider() {
     _auth.authStateChanges().listen(_onAuthStateChanged);
@@ -23,12 +25,19 @@ class AuthProvider with ChangeNotifier {
 
   void _onAuthStateChanged(User? user) {
     _user = user;
-    if (user != null) {
+    if (user != null && !_isRegistering) { // Only check admin status if not registering
       _checkAdminStatus();
-    } else {
+    } else if (user == null) {
       _isAdmin = false;
       _userName = null;
+      _isRegistering = false; // Reset registration flag
     }
+    notifyListeners();
+  }
+
+  // Method to set registration state
+  void setRegistering(bool isRegistering) {
+    _isRegistering = isRegistering;
     notifyListeners();
   }
 

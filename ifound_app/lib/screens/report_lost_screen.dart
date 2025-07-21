@@ -151,11 +151,6 @@ class _ReportLostScreenState extends State<ReportLostScreen> with SingleTickerPr
     final hasUser = user != null;
     final isSmallScreen = ResponsiveHelper.isSmallScreen(context);
     
-    // Responsive sizing
-    final tabFontSize = isSmallScreen ? 12.0 : 14.0;
-    final tabIconSize = isSmallScreen ? 16.0 : 18.0;
-    final badgeFontSize = isSmallScreen ? 10.0 : 11.0;
-    
     return IFoundBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -176,16 +171,16 @@ class _ReportLostScreenState extends State<ReportLostScreen> with SingleTickerPr
                       right: isSmallScreen ? 12 : 20,
                       bottom: isSmallScreen ? 4 : 8,
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
                         Expanded(
                           child: Text(
                             'Lost Documents'.tr(),
                             textAlign: TextAlign.center,
                             style: GoogleFonts.poppins(
                               fontWeight: FontWeight.bold,
-                              fontSize: isSmallScreen ? 20 : 24,
+                              fontSize: 20, // was 20/24
                               color: Colors.red[700],
                               letterSpacing: 0.5,
                               shadows: [
@@ -193,7 +188,7 @@ class _ReportLostScreenState extends State<ReportLostScreen> with SingleTickerPr
                                   color: Colors.red.withOpacity(0.08),
                                   blurRadius: 4,
                                   offset: Offset(0, 2),
-                                ),
+                        ),
                               ],
                             ),
                             maxLines: 1,
@@ -210,156 +205,43 @@ class _ReportLostScreenState extends State<ReportLostScreen> with SingleTickerPr
                             minHeight: isSmallScreen ? 36 : 44,
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  Container(
+                  ],
+                ),
+              ),
+                      Container(
                     height: 3,
                     width: 50,
-                    decoration: BoxDecoration(
+                        decoration: BoxDecoration(
                       color: Colors.red[400],
                       borderRadius: BorderRadius.circular(6),
-                    ),
+                        ),
                   ),
                   SizedBox(height: isSmallScreen ? 4 : 6),
                   if (hasUser)
                     Flexible(
                       child: TabBar(
                         controller: _tabController,
-                        indicatorColor: Colors.red,
-                        labelColor: Colors.red,
-                        unselectedLabelColor: Colors.grey,
-                        labelStyle: GoogleFonts.poppins(fontSize: tabFontSize, fontWeight: FontWeight.w600),
-                        unselectedLabelStyle: GoogleFonts.poppins(fontSize: tabFontSize, fontWeight: FontWeight.w500),
+                        labelStyle: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold),
+                        unselectedLabelStyle: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w500),
+                        labelColor: Colors.red[700],
+                        unselectedLabelColor: Colors.red[400],
+                        indicatorColor: Colors.red[700],
+                        indicatorWeight: 3,
                         indicatorSize: TabBarIndicatorSize.tab,
-                        isScrollable: isSmallScreen,
+                        dividerColor: Colors.transparent,
                         tabs: [
                           Tab(
-                            child: isSmallScreen 
-                              ? Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.person, size: tabIconSize * 0.8),
-                                    if (_myReports.isNotEmpty) ...[
-                                      SizedBox(height: 1),
-                                      Container(
-                                        padding: EdgeInsets.all(1),
-                                        decoration: BoxDecoration(
-                                          color: Colors.red,
-                                          borderRadius: BorderRadius.circular(6),
-                                        ),
-                                        child: Text(
-                                          '${_myReports.length}',
-                                          style: GoogleFonts.poppins(
-                                            color: Colors.white, 
-                                            fontSize: 7,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ],
-                                )
-                              : Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.person, size: tabIconSize),
-                                    SizedBox(width: 6),
-                                    Flexible(
-                                      child: Text(
-                                        'My Reports'.tr(),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    if (_myReports.isNotEmpty) ...[
-                                      SizedBox(width: 6),
-                                      Container(
-                                        padding: EdgeInsets.all(4),
-                                        decoration: BoxDecoration(
-                                          color: Colors.red,
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                        child: Text(
-                                          '${_myReports.length}',
-                                          style: GoogleFonts.poppins(
-                                            color: Colors.white, 
-                                            fontSize: badgeFontSize,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ],
-                                ),
+                            icon: Icon(Icons.person_rounded, size: 20),
                           ),
                           Tab(
-                            child: isSmallScreen 
-                              ? Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.public, size: tabIconSize * 0.8),
-                                    if (_allReports.isNotEmpty) ...[
-                                      SizedBox(height: 1),
-                                      Container(
-                                        padding: EdgeInsets.all(1),
-                                        decoration: BoxDecoration(
-                                          color: Colors.blue,
-                                          borderRadius: BorderRadius.circular(6),
-                                        ),
-                                        child: Text(
-                                          '${_allReports.length}',
-                                          style: GoogleFonts.poppins(
-                                            color: Colors.white, 
-                                            fontSize: 7,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ],
-                                )
-                              : Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.public, size: tabIconSize),
-                                    SizedBox(width: 6),
-                                    Flexible(
-                                      child: Text(
-                                        'All Reports'.tr(),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    if (_allReports.isNotEmpty) ...[
-                                      SizedBox(width: 6),
-                                      Container(
-                                        padding: EdgeInsets.all(4),
-                                        decoration: BoxDecoration(
-                                          color: Colors.blue,
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                        child: Text(
-                                          '${_allReports.length}',
-                                          style: GoogleFonts.poppins(
-                                            color: Colors.white, 
-                                            fontSize: badgeFontSize,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                          ),
-                        ],
+                            icon: Icon(Icons.people_rounded, size: 20),
+                      ),
+                    ],
                       ),
                     ),
-                ],
+                  ],
+                ),
               ),
-            ),
           ),
         ),
         body: TabBarView(
@@ -382,7 +264,7 @@ class _ReportLostScreenState extends State<ReportLostScreen> with SingleTickerPr
               fontSize: isSmallScreen ? 14 : 16,
               fontWeight: FontWeight.w600,
             ),
-          ),
+        ),
         ) : null,
       ),
     );
@@ -489,12 +371,17 @@ class _ReportLostScreenState extends State<ReportLostScreen> with SingleTickerPr
   
   String _getTimeAgo(dynamic timestamp) {
     if (timestamp == null) return '';
-    
     try {
-      final dateTime = timestamp is Timestamp ? timestamp.toDate() : DateTime.parse(timestamp.toString());
+      DateTime dateTime;
+      if (timestamp is Timestamp) {
+        dateTime = timestamp.toDate();
+      } else if (timestamp is String) {
+        dateTime = DateTime.parse(timestamp);
+      } else {
+        return '';
+      }
       final now = DateTime.now();
       final difference = now.difference(dateTime);
-      
       if (difference.inDays > 0) {
         return '${difference.inDays}d ago';
       } else if (difference.inHours > 0) {

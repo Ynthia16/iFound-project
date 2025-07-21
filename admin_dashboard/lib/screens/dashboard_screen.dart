@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/auth_provider.dart';
+import '../providers/auth_provider.dart' as admin_auth;
 import '../providers/theme_provider.dart';
 import '../widgets/dashboard_overview.dart';
 import '../widgets/admin_navigation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../screens/resolved_cases_screen.dart';
+import 'dart:async';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -21,6 +23,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     const DashboardOverview(),
     const UsersManagementScreen(),
     const ReportsManagementScreen(),
+    const ResolvedCasesScreen(), // NEW: Add resolved cases screen
     const AnalyticsScreen(),
     const SettingsScreen(),
     const AuditLogsScreen(),
@@ -63,9 +66,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
             },
           ),
           PopupMenuButton<String>(
-            onSelected: (value) {
+            onSelected: (value) async {
               if (value == 'logout') {
-                Provider.of<AuthProvider>(context, listen: false).signOut();
+                final messenger = ScaffoldMessenger.of(context);
+                try {
+                  await Provider.of<admin_auth.AuthProvider>(context, listen: false).signOut();
+                  // Navigation will be handled automatically by the AuthProvider listener in main.dart
+                } catch (e) {
+                  if (mounted) {
+                    messenger.showSnackBar(
+                      SnackBar(
+                        content: Text('Logout error: ${e.toString()}'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
               }
             },
             itemBuilder: (context) => [
@@ -141,16 +157,22 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
   String _searchQuery = '';
   String _roleFilter = 'all';
   final Set<String> _selectedUsers = {};
+  StreamSubscription<QuerySnapshot>? _usersSubscription;
 
   @override
   void initState() {
     super.initState();
-    _loadUsers();
+    _setupUsersListener();
   }
 
-  Future<void> _loadUsers() async {
-    try {
-      final snapshot = await _firestore.collection('users').get();
+  @override
+  void dispose() {
+    _usersSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _setupUsersListener() {
+    _usersSubscription = _firestore.collection('users').snapshots().listen((snapshot) {
       final users = snapshot.docs.map((doc) {
         final data = doc.data();
         data['id'] = doc.id;
@@ -163,7 +185,15 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
         _isLoading = false;
       });
       _applyFilters();
+    });
+  }
+
+  Future<void> _loadUsers() async {
+    try {
+      // The real-time listener will handle the updates
+      // This function is now mainly for manual refresh
     } catch (e) {
+      print('Error loading users: $e');
       setState(() {
         _isLoading = false;
       });
@@ -176,12 +206,17 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
         final matchesSearch = user['name']?.toString().toLowerCase().contains(_searchQuery.toLowerCase()) == true ||
                             user['email']?.toString().toLowerCase().contains(_searchQuery.toLowerCase()) == true;
 
+        // Handle users that don't have isAdmin or role fields (from mobile app)
+        final isAdmin = user['isAdmin'] == true || user['role'] == 'admin';
+        final isUser = !isAdmin; // If not admin, then user
+
         final matchesRole = _roleFilter == 'all' ||
-                           (_roleFilter == 'admin' && (user['isAdmin'] == true || user['role'] == 'admin')) ||
-                           (_roleFilter == 'user' && user['isAdmin'] != true && user['role'] != 'admin');
+                           (_roleFilter == 'admin' && isAdmin) ||
+                           (_roleFilter == 'user' && isUser);
 
         return matchesSearch && matchesRole;
       }).toList();
+      
     });
   }
 
@@ -221,6 +256,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
       await _firestore.collection('users').doc(userId).update({
         'isAdmin': isAdmin,
         'role': isAdmin ? 'admin' : 'user',
+        'updatedAt': FieldValue.serverTimestamp(),
       });
 
       // Creating audit log entry
@@ -263,7 +299,10 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
           children: [
             Text('Email: ${user['email']}'),
             Text('Role: ${(user['isAdmin'] == true || user['role'] == 'admin') ? 'Admin' : 'User'}'),
+            if (user['createdAt'] != null)
             Text('Joined: ${_formatDate(user['createdAt'])}'),
+            if (user['updatedAt'] != null)
+              Text('Last Updated: ${_formatDate(user['updatedAt'])}'),
             if (user['lastLogin'] != null)
               Text('Last Login: ${_formatDate(user['lastLogin'])}'),
           ],
@@ -279,11 +318,23 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
   }
 
   String _formatDate(dynamic timestamp) {
+    if (timestamp == null) return 'Unknown';
+    
+    try {
+      DateTime dateTime;
     if (timestamp is Timestamp) {
-      final date = timestamp.toDate();
-      return '${date.day}/${date.month}/${date.year}';
-    }
+        dateTime = timestamp.toDate();
+      } else if (timestamp is String) {
+        dateTime = DateTime.parse(timestamp);
+      } else if (timestamp is int) {
+        dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
+      } else {
+        return 'Unknown';
+      }
+      return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+    } catch (e) {
     return 'Unknown';
+    }
   }
 
   Future<void> _exportUsers() async {
@@ -338,6 +389,83 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
         );
       }
     }
+  }
+
+  Future<void> _updateUserWithRealData(String userId, String realName, String realEmail) async {
+    try {
+      await _firestore.collection('users').doc(userId).update({
+        'name': realName,
+        'email': realEmail,
+        'updatedAt': FieldValue.serverTimestamp(),
+        'needsUpdate': false,
+        'note': 'Updated with real user data',
+      });
+    } catch (e) {
+      print('Error updating user $userId: $e');
+    }
+  }
+
+  void _showUpdateUserDialog(Map<String, dynamic> user) {
+    final nameController = TextEditingController(text: user['name'] ?? '');
+    final emailController = TextEditingController(text: user['email'] ?? '');
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Update User: ${user['id']}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                labelText: 'Real Name',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: emailController,
+              decoration: const InputDecoration(
+                labelText: 'Real Email',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final realName = nameController.text.trim();
+              final realEmail = emailController.text.trim();
+              
+              if (realName.isNotEmpty && realEmail.isNotEmpty) {
+                await _updateUserWithRealData(user['id'], realName, realEmail);
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Updated user ${user['id']} with real data'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please enter both name and email'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            child: const Text('Update'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -453,8 +581,28 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                       const DataColumn(label: Text('Actions')),
                     ],
                     rows: _filteredUsers.map((user) {
-                      final createdAt = user['createdAt'] as Timestamp?;
-                      final joinedDate = createdAt?.toDate() ?? DateTime.now();
+                      final createdAtRaw = user['createdAt'];
+                      DateTime? joinedDate;
+                      if (createdAtRaw is Timestamp) {
+                        joinedDate = createdAtRaw.toDate();
+                      } else if (createdAtRaw is String) {
+                        joinedDate = DateTime.tryParse(createdAtRaw);
+                      } else if (createdAtRaw is int) {
+                        joinedDate = DateTime.fromMillisecondsSinceEpoch(createdAtRaw);
+                      }
+                      // If no createdAt, try updatedAt
+                      if (joinedDate == null) {
+                        final updatedAtRaw = user['updatedAt'];
+                        if (updatedAtRaw is Timestamp) {
+                          joinedDate = updatedAtRaw.toDate();
+                        } else if (updatedAtRaw is String) {
+                          joinedDate = DateTime.tryParse(updatedAtRaw);
+                        } else if (updatedAtRaw is int) {
+                          joinedDate = DateTime.fromMillisecondsSinceEpoch(updatedAtRaw);
+                        }
+                      }
+                      joinedDate ??= DateTime.now();
+                      
                       final isSelected = _selectedUsers.contains(user['id']);
 
                       return DataRow(
@@ -474,8 +622,8 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                               },
                             ),
                           ),
-                          DataCell(Text(user['name'] ?? 'Unknown')),
-                          DataCell(Text(user['email'] ?? 'No email')),
+                          DataCell(Text(user['name']?.toString().isNotEmpty == true ? user['name'] : 'No Name')),
+                          DataCell(Text(user['email']?.toString().isNotEmpty == true ? user['email'] : 'No Email')),
                           DataCell(
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -529,6 +677,11 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                                   ),
                                   icon: const Icon(Icons.swap_horiz, size: 16),
                                   tooltip: 'Change Role',
+                                ),
+                                IconButton(
+                                  onPressed: () => _showUpdateUserDialog(user),
+                                  icon: const Icon(Icons.edit, size: 16),
+                                  tooltip: 'Update User',
                                 ),
                                 IconButton(
                                   onPressed: () => _deleteUser(user['id']),
@@ -712,11 +865,23 @@ class _ReportsManagementScreenState extends State<ReportsManagementScreen> {
   }
 
   String _formatDate(dynamic timestamp) {
+    if (timestamp == null) return 'Unknown';
+    
+    try {
+      DateTime dateTime;
     if (timestamp is Timestamp) {
-      final date = timestamp.toDate();
-      return '${date.day}/${date.month}/${date.year}';
-    }
+        dateTime = timestamp.toDate();
+      } else if (timestamp is String) {
+        dateTime = DateTime.parse(timestamp);
+      } else if (timestamp is int) {
+        dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
+      } else {
+        return 'Unknown';
+      }
+      return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+    } catch (e) {
     return 'Unknown';
+    }
   }
 
   Future<void> _exportReports() async {
@@ -904,8 +1069,17 @@ class _ReportsManagementScreenState extends State<ReportsManagementScreen> {
                       const DataColumn(label: Text('Actions')),
                     ],
                     rows: _filteredReports.map((report) {
-                      final timestamp = report['timestamp'] as Timestamp?;
-                      final date = timestamp?.toDate() ?? DateTime.now();
+                      final timestampRaw = report['timestamp'];
+                      DateTime? date;
+                      if (timestampRaw is Timestamp) {
+                        date = timestampRaw.toDate();
+                      } else if (timestampRaw is String) {
+                        date = DateTime.tryParse(timestampRaw);
+                      } else if (timestampRaw is int) {
+                        date = DateTime.fromMillisecondsSinceEpoch(timestampRaw);
+                      }
+                      date ??= DateTime.now();
+                      
                       final isSelected = _selectedReports.contains(report['id']);
 
                       return DataRow(
@@ -1044,16 +1218,30 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       final lastMonth = DateTime(now.year, now.month - 1);
 
       final thisMonthReports = reports.where((doc) {
-        final timestamp = doc.data()['timestamp'] as Timestamp?;
-        if (timestamp == null) return false;
-        final reportDate = timestamp.toDate();
+        final timestampRaw = doc.data()['timestamp'];
+        DateTime? reportDate;
+        if (timestampRaw is Timestamp) {
+          reportDate = timestampRaw.toDate();
+        } else if (timestampRaw is String) {
+          reportDate = DateTime.tryParse(timestampRaw);
+        } else if (timestampRaw is int) {
+          reportDate = DateTime.fromMillisecondsSinceEpoch(timestampRaw);
+        }
+        if (reportDate == null) return false;
         return reportDate.isAfter(thisMonth);
       }).length;
 
       final lastMonthReports = reports.where((doc) {
-        final timestamp = doc.data()['timestamp'] as Timestamp?;
-        if (timestamp == null) return false;
-        final reportDate = timestamp.toDate();
+        final timestampRaw = doc.data()['timestamp'];
+        DateTime? reportDate;
+        if (timestampRaw is Timestamp) {
+          reportDate = timestampRaw.toDate();
+        } else if (timestampRaw is String) {
+          reportDate = DateTime.tryParse(timestampRaw);
+        } else if (timestampRaw is int) {
+          reportDate = DateTime.fromMillisecondsSinceEpoch(timestampRaw);
+        }
+        if (reportDate == null) return false;
         return reportDate.isAfter(lastMonth) && reportDate.isBefore(thisMonth);
       }).length;
 

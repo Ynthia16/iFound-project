@@ -1,25 +1,38 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return request.auth != null && 
+        (request.auth.token.admin == true || 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true ||
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+    }
+    
     // Allow authenticated users to read and write reports
+    // Admins can access all reports, regular users can access all reports
     match /reports/{document} {
       allow read, write: if request.auth != null;
     }
     
     // Allow authenticated users to read and write feedback
+    // Admins can access all feedback, regular users can access all feedback
     match /feedback/{document} {
       allow read, write: if request.auth != null;
     }
     
     // Allow users to read and write their own profile
+    // Admins can also read all user profiles for management
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if request.auth != null && 
+        (request.auth.uid == userId || isAdmin());
     }
     
     // Allow users to read and write their own notifications
+    // Admins can access all notifications
     match /notifications/{document} {
       allow read, write: if request.auth != null && 
-        (resource == null || resource.data.userId == request.auth.uid);
+        (resource == null || resource.data.userId == request.auth.uid || isAdmin());
     }
   }
 } 

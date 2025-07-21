@@ -163,5 +163,14 @@
   "Permanently delete account": "Supprimer définitivement le compte",
   "Paramètres": "Paramètres",
   "Logout": "Déconnexion",
-  "Welcome to iFound": "Bienvenue sur iFound"
+  "Welcome to iFound": "Bienvenue sur iFound",
+  "Language & Region": "Langue et Région",
+  "Share location in reports": "Partager la localisation dans les rapports",
+  "Lost": "Perdu",
+  "Found": "Trouvé",
+  "Rate": "Évaluer",
+  "Happy Users": "Utilisateurs Satisfaits",
+  "No lost reports yet": "Aucun rapport de perte pour le moment",
+  "Be the first to report a lost document!": "Soyez le premier à signaler un document perdu !",
+  "✅ Account created successfully! Please sign in.": "✅ Compte créé avec succès ! Veuillez vous connecter."
 } 

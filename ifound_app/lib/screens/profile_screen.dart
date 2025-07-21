@@ -10,6 +10,7 @@ import 'dart:io';
 import '../services/firestore_service.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
+import '../main.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -123,15 +124,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 Text(
                   'Choose Your Avatar',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  style: GoogleFonts.poppins(
                     fontWeight: FontWeight.bold,
-                    fontSize: 22,
+                    fontSize: 20, // was 22
                   ),
                 ),
                 const SizedBox(height: 12),
                 Text(
                   'Select an avatar to maintain your privacy',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  style: GoogleFonts.poppins(
                     color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
                     fontSize: 16,
                   ),
@@ -439,8 +440,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     if (shouldLogout == true && mounted) {
+      try {
       await FirebaseAuth.instance.signOut();
-      navigator.popUntil((route) => route.isFirst);
+        if (mounted) {
+          // Clear the entire navigation stack completely
+          navigator.pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const AuthWrapper()),
+            (route) => false,
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Logout failed: ${e.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
     }
   }
 
@@ -523,13 +541,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Card(
                 elevation: 4,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(isSmallScreen ? 16 : 20)),
-                child: Padding(
+              child: Padding(
                   padding: EdgeInsets.all(cardPadding),
-                  child: Column(
-                    children: [
+                child: Column(
+                  children: [
                       // Profile Picture/Avatar
-                      Stack(
-                        children: [
+                    Stack(
+                      children: [
                           _buildProfileImage(isSmallScreen),
                           if (_isUploadingImage)
                             Positioned.fill(
@@ -545,11 +563,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                 ),
                               ),
-                            ),
-                          Positioned(
-                            bottom: 0,
-                            right: 0,
-                            child: GestureDetector(
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: GestureDetector(
                               onTap: _isUploadingImage ? null : _showAvatarSelectionDialog,
                               child: Container(
                                 padding: EdgeInsets.all(cameraPadding),
@@ -563,11 +581,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   color: Colors.white,
                                   size: cameraIconSize
                                 ),
-                              ),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
+                    ),
                       SizedBox(height: isSmallScreen ? 12 : 16),
 
                       // User Info
@@ -595,11 +613,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             fontSize: memberFontSize,
                             color: isDark ? Colors.white54 : Colors.grey[500],
                           ),
-                        ),
+                                ),
                       ],
                     ],
-                  ),
-                ),
+                        ),
+                      ),
               ),
               SizedBox(height: isSmallScreen ? 16 : 20),
 

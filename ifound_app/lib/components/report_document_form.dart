@@ -69,44 +69,44 @@ class _ReportDocumentFormState extends State<ReportDocumentForm> {
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      isLost ? Icons.search_rounded : Icons.check_circle_rounded, 
-                      color: accentColor, 
-                      size: 36
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Text(
-                        widget.title,
-                        style: TextStyle(
-                          fontSize: 24, 
-                          fontWeight: FontWeight.bold, 
-                          color: accentColor
-                        ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    isLost ? Icons.search_rounded : Icons.check_circle_rounded, 
+                    color: accentColor, 
+                    size: 36
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Text(
+                      widget.title,
+                      style: TextStyle(
+                        fontSize: 24, 
+                        fontWeight: FontWeight.bold, 
+                        color: accentColor
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 32),
-                IFoundTextField(
-                  label: 'Full Name on Document',
-                  controller: nameController,
-                ),
-                const SizedBox(height: 20),
-                IFoundDropdown<String>(
-                  label: 'Document Type',
-                  value: docType,
-                  items: docTypes.map((type) => DropdownMenuItem(
-                    value: type,
-                    child: Row(
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
+              IFoundTextField(
+                label: 'Full Name on Document',
+                controller: nameController,
+              ),
+              const SizedBox(height: 20),
+              IFoundDropdown<String>(
+                label: 'Document Type',
+                value: docType,
+                items: docTypes.map((type) => DropdownMenuItem(
+                  value: type,
+                  child: Row(
                       mainAxisSize: MainAxisSize.min,
-                      children: [
+                    children: [
                         Icon(
                           Icons.description_rounded, 
                           color: Theme.of(context).brightness == Brightness.dark 
@@ -122,20 +122,20 @@ class _ReportDocumentFormState extends State<ReportDocumentForm> {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                      ],
-                    ),
-                  )).toList(),
-                  onChanged: (val) => setState(() => docType = val),
-                ),
-                const SizedBox(height: 20),
-                IFoundDropdown<String>(
-                  label: 'Institution (if any)',
-                  value: institution,
-                  items: institutions.map((inst) => DropdownMenuItem(
-                    value: inst,
-                    child: Row(
+                    ],
+                  ),
+                )).toList(),
+                onChanged: (val) => setState(() => docType = val),
+              ),
+              const SizedBox(height: 20),
+              IFoundDropdown<String>(
+                label: 'Institution (if any)',
+                value: institution,
+                items: institutions.map((inst) => DropdownMenuItem(
+                  value: inst,
+                  child: Row(
                       mainAxisSize: MainAxisSize.min,
-                      children: [
+                    children: [
                         Icon(
                           Icons.school_rounded, 
                           color: Theme.of(context).brightness == Brightness.dark 
@@ -151,31 +151,31 @@ class _ReportDocumentFormState extends State<ReportDocumentForm> {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                      ],
-                    ),
-                  )).toList(),
-                  onChanged: (val) => setState(() => institution = val),
-                ),
-                const SizedBox(height: 20),
-                SectorDropdown(
-                  value: sector,
-                  onChanged: (val) => setState(() => sector = val),
-                ),
-                const SizedBox(height: 32),
-                IFoundButton(
-                  text: widget.buttonText,
-                  onPressed: isValid
-                      ? () {
-                          widget.onSubmit(
-                            nameController.text.trim(),
-                            docType!,
-                            institution!,
-                            sector!,
-                          );
-                        }
-                      : null,
-                ),
-              ],
+                    ],
+                  ),
+                )).toList(),
+                onChanged: (val) => setState(() => institution = val),
+              ),
+              const SizedBox(height: 20),
+              SectorDropdown(
+                value: sector,
+                onChanged: (val) => setState(() => sector = val),
+              ),
+              const SizedBox(height: 32),
+              IFoundButton(
+                text: widget.buttonText,
+                onPressed: isValid
+                    ? () {
+                        widget.onSubmit(
+                          nameController.text.trim(),
+                          docType!,
+                          institution!,
+                          sector!,
+                        );
+                      }
+                    : null,
+              ),
+            ],
             ),
           ),
         ),

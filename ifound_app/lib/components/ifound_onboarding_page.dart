@@ -36,9 +36,9 @@ class IFoundOnboardingPage extends StatelessWidget {
         child: IntrinsicHeight(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
                 SizedBox(
                   width: imageSize,
                   height: imageSize,
@@ -48,25 +48,25 @@ class IFoundOnboardingPage extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: verticalSpacing),
-                Text(
-                  title,
-                  style: GoogleFonts.poppins(
+          Text(
+            title,
+            style: GoogleFonts.poppins(
                     fontSize: titleFontSize,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF2196F3),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF2196F3),
+            ),
+            textAlign: TextAlign.center,
+          ),
                 SizedBox(height: smallSpacing),
-                Text(
-                  subtitle,
-                  style: GoogleFonts.poppins(
+          Text(
+            subtitle,
+            style: GoogleFonts.poppins(
                     fontSize: subtitleFontSize,
-                    color: Colors.black87,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
+              color: Colors.black87,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
             ),
           ),
         ),

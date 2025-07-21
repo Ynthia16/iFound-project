@@ -77,6 +77,10 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
+      // Set registration flag to prevent automatic redirect
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      authProvider.setRegistering(true);
+
       // Create user with Firebase Auth
       final userCredential = await fb_auth.FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
@@ -93,11 +97,19 @@ class _LoginScreenState extends State<LoginScreen> {
         'lastLogin': FieldValue.serverTimestamp(),
       });
 
+      // Sign out the user immediately after registration to prevent auto-login
+      await fb_auth.FirebaseAuth.instance.signOut();
+
+      // Reset registration flag
+      authProvider.setRegistering(false);
+
       if (mounted) {
+        // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Account created successfully! Please sign in with your credentials.'),
             backgroundColor: Colors.green,
+            duration: Duration(seconds: 3),
           ),
         );
         
@@ -107,15 +119,20 @@ class _LoginScreenState extends State<LoginScreen> {
         _nameController.clear();
         setState(() {
           _isRegistering = false;
+          _isLoading = false;
         });
       }
     } catch (e) {
+      // Reset registration flag on error
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      authProvider.setRegistering(false);
+
       if (mounted) {
         String errorMessage = 'Registration failed';
         if (e.toString().contains('email-already-in-use')) {
           errorMessage = 'Email is already registered. Try logging in instead.';
         } else if (e.toString().contains('weak-password')) {
-          errorMessage = 'Password is too weak. Use at least 6 characters.';
+          errorMessage = 'Password is too weak. Use at least 8 characters with uppercase, lowercase, and number.';
         }
         
         ScaffoldMessenger.of(context).showSnackBar(
@@ -124,9 +141,6 @@ class _LoginScreenState extends State<LoginScreen> {
             backgroundColor: Colors.red,
           ),
         );
-      }
-    } finally {
-      if (mounted) {
         setState(() {
           _isLoading = false;
         });
@@ -270,6 +284,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               if (_isRegistering && (value == null || value.isEmpty)) {
                                 return 'Please enter your name';
                               }
+                              if (_isRegistering && value != null && value.trim().split(' ').length < 2) {
+                                return 'Please enter your full name (first and last name)';
+                              }
                               return null;
                             },
                           ),
@@ -298,7 +315,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             if (value == null || value.isEmpty) {
                               return 'Please enter your email';
                             }
-                            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                            // More comprehensive email validation that handles Gmail formats
+                            if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(value)) {
                               return 'Please enter a valid email';
                             }
                             return null;
@@ -342,6 +360,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             }
                             if (value.length < 6) {
                               return 'Password must be at least 6 characters';
+                            }
+                            if (_isRegistering && value.length < 8) {
+                              return 'Password must be at least 8 characters for registration';
+                            }
+                            if (_isRegistering && !RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)').hasMatch(value)) {
+                              return 'Password must contain uppercase, lowercase, and number';
                             }
                             return null;
                           },

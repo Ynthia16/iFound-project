@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import '../components/ifound_logo.dart';
 import '../components/ifound_textfield.dart';
-import '../components/ifound_button.dart';
 import '../services/auth_service.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 /// Register screen for new user sign up.
 class RegisterScreen extends StatefulWidget {
@@ -43,7 +44,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final isSmallScreen = screenWidth < 400;
     final padding = isSmallScreen ? 16.0 : 24.0;
     final logoSize = isSmallScreen ? 80.0 : 100.0;
-    final titleSize = isSmallScreen ? 24.0 : 28.0;
     final verticalPadding = isSmallScreen ? 20.0 : 32.0;
 
     return Scaffold(
@@ -61,8 +61,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 SizedBox(height: isSmallScreen ? 20 : 32),
                 Text(
                   'create_account'.tr(),
-                  style: TextStyle(
-                    fontSize: titleSize,
+                  style: GoogleFonts.poppins(
+                    fontSize: 22, // was 24/28
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF2196F3),
                   ),
@@ -119,8 +119,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: const CircularProgressIndicator(),
                   ),
                 if (!_isLoading)
-                  IFoundButton(
-                    text: 'Register',
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2196F3),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        elevation: 4,
+                        minimumSize: const Size.fromHeight(48), // 48dp height
+                      ),
                     onPressed: () async {
                       if (!_formKey.currentState!.validate()) return;
                       setState(() => _isLoading = true);
@@ -130,20 +141,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           passwordController.text.trim(),
                           nameController.text.trim(),
                         );
-
+                        
                         if (userCredential != null) {
-                          // Show success message and navigate to login
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('✅ Account created successfully! Please sign in.'.tr()),
-                                backgroundColor: Colors.green,
-                                duration: const Duration(seconds: 3),
-                              ),
-                            );
-                            // Navigate back to login screen after successful registration
-                            Navigator.of(context).pop();
-                          }
+                            // Sign out the user immediately after registration
+                            await FirebaseAuth.instance.signOut();
+                            
+                            // Show success message and navigate to login
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('\u2705 Account created successfully! Please sign in.'.tr(), style: GoogleFonts.poppins(fontSize: 14)),
+                                  backgroundColor: Colors.green,
+                                  duration: const Duration(seconds: 3),
+                                ),
+                              );
+                              // Navigate back to login screen after successful registration
+                              Navigator.of(context).pop();
+                            }
                         }
                       } catch (e) {
                         if (context.mounted) {
@@ -155,6 +169,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         }
                       }
                     },
+                      child: Text(
+                        'Register',
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
                   ),
                 SizedBox(height: isSmallScreen ? 16 : 24),
                 TextButton(
@@ -163,9 +186,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   },
                   child: Text(
                     'Already have an account? Login',
-                    style: TextStyle(
+                    style: GoogleFonts.poppins(
                       color: Color(0xFF2196F3),
-                      fontSize: isSmallScreen ? 14 : 16,
+                      fontSize: 14,
                     ),
                   ),
                 ),

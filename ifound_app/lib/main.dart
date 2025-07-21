@@ -79,7 +79,7 @@ class MyApp extends StatelessWidget {
               Locale('fr'),
               Locale('rw'),
             ],
-                        locale: context.locale,
+            locale: context.locale,
 
             theme: themeProvider.lightTheme,
             darkTheme: themeProvider.darkTheme,
@@ -185,8 +185,8 @@ class _AuthWrapperState extends State<AuthWrapper> {
           // Set user ID in theme provider for user-specific settings
           WidgetsBinding.instance.addPostFrameCallback((_) {
             try {
-              final themeProvider =
-                  Provider.of<ThemeProvider>(context, listen: false);
+            final themeProvider =
+                Provider.of<ThemeProvider>(context, listen: false);
               themeProvider.userId = user.uid;
             } catch (e) {
               // Handle error silently

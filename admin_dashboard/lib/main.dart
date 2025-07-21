@@ -73,9 +73,12 @@ class AdminDashboardApp extends StatelessWidget {
                     ),
                   );
                 }
-                return authProvider.isAuthenticated 
-                    ? const DashboardScreen() 
-                    : const LoginScreen();
+                // Show login screen if registering or not authenticated
+                if (authProvider.isRegistering || !authProvider.isAuthenticated) {
+                  return const LoginScreen();
+                }
+                // Show dashboard only if authenticated and not registering
+                return const DashboardScreen();
               },
             ),
           );

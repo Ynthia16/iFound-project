@@ -71,9 +71,9 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() {
+      setState(() {
           _errorMessage = e.toString().replaceAll('Exception: ', '');
-        });
+      });
 
         // Show error in snackbar as well
         ScaffoldMessenger.of(context).showSnackBar(
@@ -121,9 +121,9 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() {
+      setState(() {
           _errorMessage = e.toString().replaceAll('Exception: ', '');
-        });
+      });
 
         // Show error in snackbar as well
         ScaffoldMessenger.of(context).showSnackBar(
@@ -156,8 +156,8 @@ class _LoginScreenState extends State<LoginScreen> {
           title: Text(
             'Reset Password',
             style: GoogleFonts.poppins(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
+              fontSize: 22, // was 20
+              fontWeight: FontWeight.bold,
             ),
           ),
           content: Column(
@@ -200,22 +200,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   decoration: BoxDecoration(
                     color: Colors.red[50],
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.red[200]!),
                   ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.error_outline_rounded, color: Colors.red[600], size: 20),
-                      const SizedBox(width: 12),
-                      Expanded(
                         child: Text(
-                          errorMsg ?? '',
-                          style: GoogleFonts.poppins(
-                            color: Colors.red[700],
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                    ],
+                    errorMsg!,
+                    style: GoogleFonts.poppins(fontSize: 14, color: Colors.red),
                   ),
                 ),
               ],
@@ -226,22 +214,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   decoration: BoxDecoration(
                     color: Colors.green[50],
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.green[200]!),
                   ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.check_circle_rounded, color: Colors.green[600], size: 20),
-                      const SizedBox(width: 12),
-                      Expanded(
                         child: Text(
-                          successMsg ?? '',
-                          style: GoogleFonts.poppins(
-                            color: Colors.green[700],
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                    ],
+                    successMsg!,
+                    style: GoogleFonts.poppins(fontSize: 14, color: Colors.green[800]),
                   ),
                 ),
               ],
@@ -249,66 +225,34 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           actions: [
             TextButton(
-              onPressed: isSending ? null : () => Navigator.of(context).pop(),
-              child: Text(
-                'Cancel',
-                style: GoogleFonts.poppins(fontSize: 16),
-              ),
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Cancel', style: GoogleFonts.poppins(fontSize: 16)),
             ),
             ElevatedButton(
-              onPressed: isSending ? null : () async {
-                if (emailController.text.trim().isEmpty) {
+              onPressed: isSending
+                  ? null
+                  : () async {
+                      setDialogState(() => isSending = true);
+                      try {
+                        await AuthService().sendPasswordResetEmail(emailController.text.trim());
                   setDialogState(() {
-                    errorMsg = 'Please enter your email address';
-                  });
-                  return;
-                }
-
-                setDialogState(() {
-                  isSending = true;
+                          successMsg = 'Password reset email sent!';
                   errorMsg = null;
-                  successMsg = null;
-                });
-
-                try {
-                  await _authService.sendPasswordResetEmail(emailController.text.trim());
-                  setDialogState(() {
-                    successMsg = 'Password reset email sent! Check your inbox.';
                   });
-
-                  // Auto-close after 2 seconds
-                  if (mounted) {
-                    final navigator = Navigator.of(context);
-                    Future.delayed(const Duration(seconds: 2), () {
-                      if (mounted) navigator.pop();
-                    });
-                  }
                 } catch (e) {
                   setDialogState(() {
                     errorMsg = e.toString();
+                          successMsg = null;
                   });
                 } finally {
-                  setDialogState(() {
-                    isSending = false;
-                  });
+                        setDialogState(() => isSending = false);
                 }
               },
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                minimumSize: const Size(120, 48), // 48dp height
+                textStyle: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-              child: isSending
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(
-                      'Send Reset Link',
-                      style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600),
-                    ),
+              child: Text('Send', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -385,8 +329,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                       ],
-                    ),
                   ),
+                ),
                   const SizedBox(height: 16),
                 ],
 
@@ -530,16 +474,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: TextStyle(
                         color: isDark ? Colors.white70 : Colors.grey[600],
                         fontSize: isSmallScreen ? 13 : 14,
-                      ),
+                  ),
                     ),
-                    TextButton(
+                TextButton(
                       onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const RegisterScreen(),
-                          ),
-                        );
-                      },
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const RegisterScreen(),
+                            ),
+                          );
+                        },
                       child: Text(
                         'Sign Up',
                         style: TextStyle(
@@ -548,7 +492,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           fontSize: isSmallScreen ? 13 : 14,
                         ),
                       ),
-                    ),
+                  ),
                   ],
                 ),
               ],

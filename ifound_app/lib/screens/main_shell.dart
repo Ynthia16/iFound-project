@@ -304,12 +304,12 @@ class _MainShellState extends State<MainShell> {
                           Padding(
                             padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 20 : 0),
                             child: Text(
-                              'You\'ll see notifications here when matches are found.'.tr(),
-                              style: GoogleFonts.poppins(
+                            'You\'ll see notifications here when matches are found.'.tr(),
+                            style: GoogleFonts.poppins(
                                 fontSize: emptySubtitleFontSize,
-                                color: Colors.grey,
-                              ),
-                              textAlign: TextAlign.center,
+                              color: Colors.grey,
+                            ),
+                            textAlign: TextAlign.center,
                             ),
                           ),
                         ],
@@ -499,7 +499,7 @@ class _MainShellState extends State<MainShell> {
           children: _screens,
         ),
       ),
-      bottomNavigationBar: IFoundNavBar(
+      bottomNavigationBar: IFoundNavbar(
         currentIndex: _currentIndex,
         onTap: goToTab,
       ),

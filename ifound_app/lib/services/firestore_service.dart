@@ -3,6 +3,7 @@
 // The service includes caching to make the app faster and more reliable
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
+import 'package:flutter/foundation.dart'; // Added for kDebugMode
 
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -21,34 +22,91 @@ class FirestoreService {
     );
   }
 
-  // Check for matches when a new report is added
+  // Enhanced matching algorithm with location and sector consideration
   Future<List<Map<String, dynamic>>> checkForMatches({
     required String name,
     required String docType,
     required String status,
     required String userId,
+    String? institution,
+    String? sector,
   }) async {
     // Get the opposite status (lost -> found, found -> lost)
     final oppositeStatus = status == 'lost' ? 'found' : 'lost';
     
     try {
-      // Query for potential matches - more precise matching
-      var query = _db.collection('reports')
+      // First try exact matching for immediate results
+      var exactQuery = _db.collection('reports')
           .where('status', isEqualTo: oppositeStatus)
           .where('name', isEqualTo: name.trim())
           .where('docType', isEqualTo: docType.trim());
       
-      final snapshot = await query.get().timeout(const Duration(seconds: 15));
+      final exactSnapshot = await exactQuery.get().timeout(const Duration(seconds: 10));
+      final exactMatches = exactSnapshot.docs.map((doc) => {
+        'id': doc.id,
+        ...doc.data(),
+        'matchScore': 100, // Perfect match
+      }).toList();
       
-      // Convert to list of maps
-      final matches = snapshot.docs.map((doc) => {
+      // If we have exact matches, return them immediately
+      if (exactMatches.isNotEmpty) {
+        return exactMatches;
+      }
+      
+      // If no exact matches, try fuzzy matching
+      final allReports = await _db.collection('reports').get().timeout(const Duration(seconds: 15));
+      final allDocs = allReports.docs.map((doc) => {
         'id': doc.id,
         ...doc.data(),
       }).toList();
       
-      return matches;
+      // Filter and score potential matches
+      final potentialMatches = <Map<String, dynamic>>[];
+      
+      for (final doc in allDocs) {
+        final docStatus = doc['status']?.toString().trim().toLowerCase();
+        final docName = doc['name']?.toString().trim();
+        final docDocType = doc['docType']?.toString().trim();
+        final docInstitution = doc['institution']?.toString().trim();
+        final docSector = doc['sector']?.toString().trim();
+        
+        // Must have opposite status
+        if (docStatus != oppositeStatus.toLowerCase()) continue;
+        
+        // Calculate similarity scores
+        final nameSimilarity = _calculateNameSimilarity(name.trim(), docName ?? '');
+        final docTypeSimilarity = _calculateDocTypeSimilarity(docType.trim(), docDocType ?? '');
+        final locationSimilarity = _calculateLocationSimilarity(institution, docInstitution);
+        final sectorSimilarity = _calculateSectorSimilarity(sector, docSector);
+        
+        // Enhanced scoring with location and sector
+        // Name and document type are most important (70% weight)
+        // Location and sector provide additional context (30% weight)
+        if (nameSimilarity >= 0.7 && docTypeSimilarity >= 0.8) {
+          final matchScore = (
+            nameSimilarity * 0.4 + 
+            docTypeSimilarity * 0.3 + 
+            locationSimilarity * 0.2 + 
+            sectorSimilarity * 0.1
+          ) * 100;
+          
+          potentialMatches.add({
+            ...doc,
+            'matchScore': matchScore.round(),
+            'nameSimilarity': nameSimilarity,
+            'docTypeSimilarity': docTypeSimilarity,
+            'locationSimilarity': locationSimilarity,
+            'sectorSimilarity': sectorSimilarity,
+          });
+        }
+      }
+      
+      // Sort by match score (highest first) and return top matches
+      potentialMatches.sort((a, b) => (b['matchScore'] as int).compareTo(a['matchScore'] as int));
+      return potentialMatches.take(5).toList(); // Return top 5 matches
+      
     } catch (e) {
-      // Fallback: Get all reports and filter in memory for better compatibility
+      // Fallback to exact matching if fuzzy matching fails
       try {
         final allReports = await _db.collection('reports').get().timeout(const Duration(seconds: 10));
         final allDocs = allReports.docs.map((doc) => {
@@ -56,7 +114,6 @@ class FirestoreService {
           ...doc.data(),
         }).toList();
         
-        // Filter in memory with exact matching
         final matches = allDocs.where((doc) {
           final docStatus = doc['status']?.toString().trim().toLowerCase();
           final docName = doc['name']?.toString().trim();
@@ -66,18 +123,217 @@ class FirestoreService {
           final nameMatch = docName == name.trim();
           final docTypeMatch = docDocType == docType.trim();
           
-          // Only return exact matches for name and document type
           return statusMatch && nameMatch && docTypeMatch;
         }).toList();
         
-        return matches;
+        return matches.map((match) => {
+          ...match,
+          'matchScore': 100,
+        }).toList();
       } catch (fallbackError) {
         return [];
       }
     }
   }
 
-  // Add a lost/found report with retry logic and match checking
+  // Calculate name similarity using multiple algorithms
+  double _calculateNameSimilarity(String name1, String name2) {
+    if (name1.isEmpty || name2.isEmpty) return 0.0;
+    
+    // Normalize names for comparison
+    final normalized1 = _normalizeName(name1);
+    final normalized2 = _normalizeName(name2);
+    
+    // Exact match after normalization
+    if (normalized1 == normalized2) return 1.0;
+    
+    // Check for partial matches (one name contains the other)
+    if (normalized1.contains(normalized2) || normalized2.contains(normalized1)) {
+      return 0.9;
+    }
+    
+    // Calculate Levenshtein distance for similarity
+    final distance = _levenshteinDistance(normalized1, normalized2);
+    final maxLength = normalized1.length > normalized2.length ? normalized1.length : normalized2.length;
+    
+    if (maxLength == 0) return 0.0;
+    
+    final similarity = 1.0 - (distance / maxLength);
+    
+    // Boost similarity for common name variations
+    if (_areNameVariations(normalized1, normalized2)) {
+      return (similarity + 0.2).clamp(0.0, 1.0);
+    }
+    
+    return similarity;
+  }
+
+  // Calculate document type similarity
+  double _calculateDocTypeSimilarity(String type1, String type2) {
+    if (type1.isEmpty || type2.isEmpty) return 0.0;
+    
+    final normalized1 = type1.toLowerCase().trim();
+    final normalized2 = type2.toLowerCase().trim();
+    
+    // Exact match
+    if (normalized1 == normalized2) return 1.0;
+    
+    // Check for common abbreviations and variations
+    final variations = {
+      'id': ['identity', 'identification', 'card'],
+      'passport': ['passport', 'travel document'],
+      'license': ['driving license', 'driver license', 'license'],
+      'certificate': ['cert', 'certificate', 'diploma'],
+      'phone': ['mobile', 'cellphone', 'smartphone'],
+      'wallet': ['purse', 'wallet'],
+      'keys': ['key', 'keys'],
+    };
+    
+    // Check if both types are in the same variation group
+    for (final group in variations.entries) {
+      if (group.value.contains(normalized1) && group.value.contains(normalized2)) {
+        return 0.95;
+      }
+    }
+    
+    // Calculate similarity using Levenshtein distance
+    final distance = _levenshteinDistance(normalized1, normalized2);
+    final maxLength = normalized1.length > normalized2.length ? normalized1.length : normalized2.length;
+    
+    if (maxLength == 0) return 0.0;
+    
+    return 1.0 - (distance / maxLength);
+  }
+
+  // Normalize name for better comparison
+  String _normalizeName(String name) {
+    return name.toLowerCase()
+        .trim()
+        .replaceAll(RegExp(r'[^\w\s]'), '') // Remove special characters
+        .replaceAll(RegExp(r'\s+'), ' '); // Normalize whitespace
+  }
+
+  // Check if names are common variations of each other
+  bool _areNameVariations(String name1, String name2) {
+    final variations = {
+      'john': ['johnny', 'jon'],
+      'michael': ['mike', 'mikey'],
+      'william': ['will', 'bill', 'billy'],
+      'robert': ['rob', 'bob', 'bobby'],
+      'james': ['jim', 'jimmy'],
+      'david': ['dave', 'davey'],
+      'richard': ['rick', 'ricky', 'dick'],
+      'thomas': ['tom', 'tommy'],
+      'christopher': ['chris', 'topher'],
+      'daniel': ['dan', 'danny'],
+    };
+    
+    for (final group in variations.entries) {
+      if (group.value.contains(name1) && group.value.contains(name2)) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+
+  // Calculate Levenshtein distance between two strings
+  int _levenshteinDistance(String s1, String s2) {
+    if (s1 == s2) return 0;
+    if (s1.isEmpty) return s2.length;
+    if (s2.isEmpty) return s1.length;
+    
+    final matrix = List.generate(
+      s1.length + 1,
+      (i) => List.generate(s2.length + 1, (j) => 0),
+    );
+    
+    for (int i = 0; i <= s1.length; i++) {
+      matrix[i][0] = i;
+    }
+    
+    for (int j = 0; j <= s2.length; j++) {
+      matrix[0][j] = j;
+    }
+    
+    for (int i = 1; i <= s1.length; i++) {
+      for (int j = 1; j <= s2.length; j++) {
+        final cost = s1[i - 1] == s2[j - 1] ? 0 : 1;
+        matrix[i][j] = [
+          matrix[i - 1][j] + 1, // deletion
+          matrix[i][j - 1] + 1, // insertion
+          matrix[i - 1][j - 1] + cost, // substitution
+        ].reduce((a, b) => a < b ? a : b);
+      }
+    }
+    
+    return matrix[s1.length][s2.length];
+  }
+
+  // Calculate location similarity
+  double _calculateLocationSimilarity(String? location1, String? location2) {
+    if (location1 == null || location2 == null || location1.isEmpty || location2.isEmpty) {
+      return 0.5; // Neutral score if location info is missing
+    }
+    
+    final normalized1 = location1.toLowerCase().trim();
+    final normalized2 = location2.toLowerCase().trim();
+    
+    // Exact match
+    if (normalized1 == normalized2) return 1.0;
+    
+    // Check for partial matches
+    if (normalized1.contains(normalized2) || normalized2.contains(normalized1)) {
+      return 0.8;
+    }
+    
+    // Calculate similarity using Levenshtein distance
+    final distance = _levenshteinDistance(normalized1, normalized2);
+    final maxLength = normalized1.length > normalized2.length ? normalized1.length : normalized2.length;
+    
+    if (maxLength == 0) return 0.0;
+    
+    return 1.0 - (distance / maxLength);
+  }
+
+  // Calculate sector similarity
+  double _calculateSectorSimilarity(String? sector1, String? sector2) {
+    if (sector1 == null || sector2 == null || sector1.isEmpty || sector2.isEmpty) {
+      return 0.5; // Neutral score if sector info is missing
+    }
+    
+    final normalized1 = sector1.toLowerCase().trim();
+    final normalized2 = sector2.toLowerCase().trim();
+    
+    // Exact match
+    if (normalized1 == normalized2) return 1.0;
+    
+    // Check for common sector variations
+    final sectorVariations = {
+      'education': ['school', 'university', 'college', 'academic'],
+      'healthcare': ['hospital', 'clinic', 'medical', 'health'],
+      'government': ['gov', 'government', 'public', 'official'],
+      'business': ['corporate', 'company', 'office', 'work'],
+      'transportation': ['transport', 'travel', 'commute', 'transit'],
+    };
+    
+    // Check if both sectors are in the same variation group
+    for (final group in sectorVariations.entries) {
+      if (group.value.contains(normalized1) && group.value.contains(normalized2)) {
+        return 0.9;
+      }
+    }
+    
+    // Calculate similarity using Levenshtein distance
+    final distance = _levenshteinDistance(normalized1, normalized2);
+    final maxLength = normalized1.length > normalized2.length ? normalized1.length : normalized2.length;
+    
+    if (maxLength == 0) return 0.0;
+    
+    return 1.0 - (distance / maxLength);
+  }
+
+  // Add a lost/found report with retry logic and enhanced match checking
   Future<void> addReport({
     required String name,
     required String docType,
@@ -98,15 +354,17 @@ class FirestoreService {
           'sector': sector,
           'status': status,
           'userId': userId,
-          'timestamp': FieldValue.serverTimestamp(),
+          'timestamp': DateTime.now().toIso8601String(), // Use client timestamp for faster response
         });
         
-        // Check for matches after adding the report
+        // Check for matches after adding the report with enhanced parameters
         final matches = await checkForMatches(
           name: name,
           docType: docType,
           status: status,
           userId: userId,
+          institution: institution,
+          sector: sector,
         );
         
         if (matches.isNotEmpty) {
@@ -256,14 +514,17 @@ class FirestoreService {
           final timestamp = report['timestamp'];
           if (timestamp == null) return false;
           
-          DateTime reportDate;
+          DateTime? reportDate;
           if (timestamp is Timestamp) {
             reportDate = timestamp.toDate();
           } else if (timestamp is int) {
             reportDate = DateTime.fromMillisecondsSinceEpoch(timestamp);
-          } else {
-            return false;
+          } else if (timestamp is String) {
+            reportDate = DateTime.tryParse(timestamp);
           }
+          
+          // If we couldn't parse the timestamp, skip this report
+          if (reportDate == null) return false;
           
           if (startDate != null && reportDate.isBefore(startDate)) {
             return false;
@@ -349,6 +610,9 @@ class FirestoreService {
         'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
     } catch (e) {
+      if (kDebugMode) {
+        print('Error saving user profile: $e');
+      }
       // Handle error silently
     }
   }
@@ -360,18 +624,30 @@ class FirestoreService {
     int? rating,
     String? userName,
   }) async {
-    try {
-      await _db.collection('feedback').add({
-        'userId': userId,
-        'feedback': feedback,
+    int retryCount = 0;
+    const maxRetries = 3;
+
+    while (retryCount < maxRetries) {
+      try {
+        await _db.collection('feedback').add({
+          'userId': userId,
+          'feedback': feedback,
         'rating': rating,
         'userName': userName,
         'likes': [],
         'replies': [],
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-    } catch (e) {
-      throw Exception('Failed to add feedback: $e');
+          'timestamp': DateTime.now().toIso8601String(), // Use client timestamp for faster response
+        }).timeout(const Duration(seconds: 5)); // Add timeout protection
+        
+        return; // Success, exit retry loop
+      } catch (e) {
+        retryCount++;
+        if (retryCount >= maxRetries) {
+          throw Exception('Failed to add feedback after $maxRetries attempts: $e');
+        }
+        // Wait before retrying (exponential backoff)
+        await Future.delayed(Duration(seconds: retryCount));
+      }
     }
   }
 
@@ -397,8 +673,8 @@ class FirestoreService {
       });
     } catch (e) {
       throw Exception('Failed to toggle like: $e');
+      }
     }
-  }
 
   Future<void> addFeedbackReply({
     required String feedbackId,
@@ -411,12 +687,12 @@ class FirestoreService {
         'userId': userId,
         'userName': userName ?? 'Anonymous',
         'reply': reply,
-        'timestamp': FieldValue.serverTimestamp(),
+        'timestamp': DateTime.now().toIso8601String(), // Use client timestamp for faster response
       };
 
       await _db.collection('feedback').doc(feedbackId).update({
         'replies': FieldValue.arrayUnion([replyData]),
-      });
+      }).timeout(const Duration(seconds: 5)); // Add timeout protection
     } catch (e) {
       throw Exception('Failed to add reply: $e');
     }
@@ -434,6 +710,34 @@ class FirestoreService {
           });
     } catch (e) {
       return Stream.empty();
+    }
+  }
+
+  // Mark report as resolved when match is found
+  Future<void> markReportAsResolved(String reportId, {String? resolutionNote}) async {
+    try {
+      await _db.collection('reports').doc(reportId).update({
+        'status': 'resolved',
+        'isResolved': true,
+        'resolvedAt': DateTime.now().toIso8601String(),
+        'resolutionNote': resolutionNote ?? 'Match found and resolved',
+      });
+    } catch (e) {
+      throw Exception('Failed to mark report as resolved: $e');
+    }
+  }
+
+  // Mark report as claimed when user claims their item
+  Future<void> markReportAsClaimed(String reportId, {String? claimNote}) async {
+    try {
+      await _db.collection('reports').doc(reportId).update({
+        'status': 'claimed',
+        'isResolved': true,
+        'claimedAt': DateTime.now().toIso8601String(),
+        'claimNote': claimNote ?? 'Item claimed by owner',
+      });
+    } catch (e) {
+      throw Exception('Failed to mark report as claimed: $e');
     }
   }
 } 
