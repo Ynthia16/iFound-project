@@ -112,7 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
             duration: Duration(seconds: 3),
           ),
         );
-        
+
         // Clear form and switch to login mode
         _emailController.clear();
         _passwordController.clear();
@@ -134,7 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
         } else if (e.toString().contains('weak-password')) {
           errorMessage = 'Password is too weak. Use at least 8 characters with uppercase, lowercase, and number.';
         }
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
@@ -166,7 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       await authProvider.resetPassword(_emailController.text.trim());
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -181,7 +181,7 @@ class _LoginScreenState extends State<LoginScreen> {
         if (e.toString().contains('user-not-found')) {
           errorMessage = 'No account found with this email address';
         }
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
@@ -233,13 +233,16 @@ class _LoginScreenState extends State<LoginScreen> {
                             color: const Color(0xFF2196F3).withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: SvgPicture.asset(
-                            'assets/images/ifound_logo.svg',
-                            height: 48,
-                            width: 48,
-                            colorFilter: const ColorFilter.mode(
-                              Color(0xFF2196F3),
-                              BlendMode.srcIn,
+                          child: Transform.scale(
+                            scale: 2.1,
+                            child: SvgPicture.asset(
+                              'assets/images/ifound_logo.svg',
+                              height: 25,
+                              width: 48,
+                              colorFilter: const ColorFilter.mode(
+                                Color(0xFF2196F3),
+                                BlendMode.srcIn,
+                              ),
                             ),
                           ),
                         ),
@@ -433,8 +436,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             });
                           },
                           child: Text(
-                            _isRegistering 
-                                ? 'Already have an account? Sign In' 
+                            _isRegistering
+                                ? 'Already have an account? Sign In'
                                 : 'New user? Register as Admin',
                             style: const TextStyle(color: Color(0xFF2196F3), fontSize: 13),
                           ),
@@ -443,7 +446,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         // Help Text
                         const SizedBox(height: 8),
                         Text(
-                          _isRegistering 
+                          _isRegistering
                               ? 'Register to create your admin account and access the dashboard'
                               : 'Sign in with your admin credentials',
                           style: const TextStyle(
@@ -463,4 +466,4 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-} 
+}

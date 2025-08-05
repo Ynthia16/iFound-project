@@ -23,7 +23,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     const DashboardOverview(),
     const UsersManagementScreen(),
     const ReportsManagementScreen(),
-    const ResolvedCasesScreen(), // NEW: Add resolved cases screen
+    const ResolvedCasesScreen(),
     const AnalyticsScreen(),
     const SettingsScreen(),
     const AuditLogsScreen(),
@@ -46,14 +46,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('iFound Admin Dashboard'),
-        leading: isSmallScreen ? IconButton(
-          icon: Icon(_isSidebarCollapsed ? Icons.menu : Icons.close),
-          onPressed: () {
-            setState(() {
-              _isSidebarCollapsed = !_isSidebarCollapsed;
-            });
-          },
-        ) : null,
+        leading: isSmallScreen
+            ? IconButton(
+                icon: Icon(_isSidebarCollapsed ? Icons.menu : Icons.close),
+                onPressed: () {
+                  setState(() {
+                    _isSidebarCollapsed = !_isSidebarCollapsed;
+                  });
+                },
+              )
+            : null,
         actions: [
           Consumer<ThemeProvider>(
             builder: (context, themeProvider, child) {
@@ -70,7 +72,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
               if (value == 'logout') {
                 final messenger = ScaffoldMessenger.of(context);
                 try {
-                  await Provider.of<admin_auth.AuthProvider>(context, listen: false).signOut();
+                  await Provider.of<admin_auth.AuthProvider>(context,
+                          listen: false)
+                      .signOut();
                   // Navigation will be handled automatically by the AuthProvider listener in main.dart
                 } catch (e) {
                   if (mounted) {
@@ -172,7 +176,8 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
   }
 
   void _setupUsersListener() {
-    _usersSubscription = _firestore.collection('users').snapshots().listen((snapshot) {
+    _usersSubscription =
+        _firestore.collection('users').snapshots().listen((snapshot) {
       final users = snapshot.docs.map((doc) {
         final data = doc.data();
         data['id'] = doc.id;
@@ -203,20 +208,27 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
   void _applyFilters() {
     setState(() {
       _filteredUsers = _users.where((user) {
-        final matchesSearch = user['name']?.toString().toLowerCase().contains(_searchQuery.toLowerCase()) == true ||
-                            user['email']?.toString().toLowerCase().contains(_searchQuery.toLowerCase()) == true;
+        final matchesSearch = user['name']
+                    ?.toString()
+                    .toLowerCase()
+                    .contains(_searchQuery.toLowerCase()) ==
+                true ||
+            user['email']
+                    ?.toString()
+                    .toLowerCase()
+                    .contains(_searchQuery.toLowerCase()) ==
+                true;
 
         // Handle users that don't have isAdmin or role fields (from mobile app)
         final isAdmin = user['isAdmin'] == true || user['role'] == 'admin';
         final isUser = !isAdmin; // If not admin, then user
 
         final matchesRole = _roleFilter == 'all' ||
-                           (_roleFilter == 'admin' && isAdmin) ||
-                           (_roleFilter == 'user' && isUser);
+            (_roleFilter == 'admin' && isAdmin) ||
+            (_roleFilter == 'user' && isUser);
 
         return matchesSearch && matchesRole;
       }).toList();
-      
     });
   }
 
@@ -241,12 +253,16 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('User deleted successfully'), backgroundColor: Colors.green),
+        const SnackBar(
+            content: Text('User deleted successfully'),
+            backgroundColor: Colors.green),
       );
       _loadUsers();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error deleting user: $e'), backgroundColor: Colors.red),
+        SnackBar(
+            content: Text('Error deleting user: $e'),
+            backgroundColor: Colors.red),
       );
     }
   }
@@ -282,7 +298,9 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error changing role: $e'), backgroundColor: Colors.red),
+          SnackBar(
+              content: Text('Error changing role: $e'),
+              backgroundColor: Colors.red),
         );
       }
     }
@@ -298,9 +316,10 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Email: ${user['email']}'),
-            Text('Role: ${(user['isAdmin'] == true || user['role'] == 'admin') ? 'Admin' : 'User'}'),
+            Text(
+                'Role: ${(user['isAdmin'] == true || user['role'] == 'admin') ? 'Admin' : 'User'}'),
             if (user['createdAt'] != null)
-            Text('Joined: ${_formatDate(user['createdAt'])}'),
+              Text('Joined: ${_formatDate(user['createdAt'])}'),
             if (user['updatedAt'] != null)
               Text('Last Updated: ${_formatDate(user['updatedAt'])}'),
             if (user['lastLogin'] != null)
@@ -319,10 +338,10 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
 
   String _formatDate(dynamic timestamp) {
     if (timestamp == null) return 'Unknown';
-    
+
     try {
       DateTime dateTime;
-    if (timestamp is Timestamp) {
+      if (timestamp is Timestamp) {
         dateTime = timestamp.toDate();
       } else if (timestamp is String) {
         dateTime = DateTime.parse(timestamp);
@@ -333,7 +352,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
       }
       return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
     } catch (e) {
-    return 'Unknown';
+      return 'Unknown';
     }
   }
 
@@ -345,7 +364,9 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
 
     // Later, I'd save this to a file
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Users exported successfully'), backgroundColor: Colors.green),
+      const SnackBar(
+          content: Text('Users exported successfully'),
+          backgroundColor: Colors.green),
     );
   }
 
@@ -356,7 +377,8 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirm Bulk Delete'),
-        content: Text('Are you sure you want to delete ${_selectedUsers.length} users?'),
+        content: Text(
+            'Are you sure you want to delete ${_selectedUsers.length} users?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -380,18 +402,24 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
           _selectedUsers.clear();
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${_selectedUsers.length} users deleted successfully'), backgroundColor: Colors.green),
+          SnackBar(
+              content:
+                  Text('${_selectedUsers.length} users deleted successfully'),
+              backgroundColor: Colors.green),
         );
         _loadUsers();
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error deleting users: $e'), backgroundColor: Colors.red),
+          SnackBar(
+              content: Text('Error deleting users: $e'),
+              backgroundColor: Colors.red),
         );
       }
     }
   }
 
-  Future<void> _updateUserWithRealData(String userId, String realName, String realEmail) async {
+  Future<void> _updateUserWithRealData(
+      String userId, String realName, String realEmail) async {
     try {
       await _firestore.collection('users').doc(userId).update({
         'name': realName,
@@ -408,7 +436,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
   void _showUpdateUserDialog(Map<String, dynamic> user) {
     final nameController = TextEditingController(text: user['name'] ?? '');
     final emailController = TextEditingController(text: user['email'] ?? '');
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -442,7 +470,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
             onPressed: () async {
               final realName = nameController.text.trim();
               final realEmail = emailController.text.trim();
-              
+
               if (realName.isNotEmpty && realEmail.isNotEmpty) {
                 await _updateUserWithRealData(user['id'], realName, realEmail);
                 Navigator.pop(context);
@@ -490,7 +518,8 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                       onPressed: _bulkDeleteUsers,
                       icon: const Icon(Icons.delete),
                       label: Text('Delete ${_selectedUsers.length}'),
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                      style:
+                          ElevatedButton.styleFrom(backgroundColor: Colors.red),
                     ),
                   const SizedBox(width: 8),
                   ElevatedButton.icon(
@@ -547,7 +576,8 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
           ),
           const SizedBox(height: 16),
 
-          Text('Total Users: ${_filteredUsers.length}', style: Theme.of(context).textTheme.bodyLarge),
+          Text('Total Users: ${_filteredUsers.length}',
+              style: Theme.of(context).textTheme.bodyLarge),
           const SizedBox(height: 24),
 
           if (_isLoading)
@@ -561,7 +591,8 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                     children: [
                       Icon(Icons.people_outline, size: 64, color: Colors.grey),
                       SizedBox(height: 16),
-                      Text('No users found', style: TextStyle(fontSize: 18, color: Colors.grey)),
+                      Text('No users found',
+                          style: TextStyle(fontSize: 18, color: Colors.grey)),
                     ],
                   ),
                 ),
@@ -588,7 +619,8 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                       } else if (createdAtRaw is String) {
                         joinedDate = DateTime.tryParse(createdAtRaw);
                       } else if (createdAtRaw is int) {
-                        joinedDate = DateTime.fromMillisecondsSinceEpoch(createdAtRaw);
+                        joinedDate =
+                            DateTime.fromMillisecondsSinceEpoch(createdAtRaw);
                       }
                       // If no createdAt, try updatedAt
                       if (joinedDate == null) {
@@ -602,7 +634,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                         }
                       }
                       joinedDate ??= DateTime.now();
-                      
+
                       final isSelected = _selectedUsers.contains(user['id']);
 
                       return DataRow(
@@ -774,7 +806,7 @@ class _ReportsManagementScreenState extends State<ReportsManagementScreen> {
 
       // Create audit log entry
       await _firestore.collection('audit_logs').add({
-        'adminId': 'current_admin', 
+        'adminId': 'current_admin',
         'adminName': 'Admin User',
         'action': 'delete_report',
         'description': 'Deleted report: ${reportData?['name'] ?? 'Unknown'} - ${reportData?['institution'] ?? 'Unknown'}',
@@ -866,7 +898,7 @@ class _ReportsManagementScreenState extends State<ReportsManagementScreen> {
 
   String _formatDate(dynamic timestamp) {
     if (timestamp == null) return 'Unknown';
-    
+
     try {
       DateTime dateTime;
     if (timestamp is Timestamp) {
@@ -1079,7 +1111,7 @@ class _ReportsManagementScreenState extends State<ReportsManagementScreen> {
                         date = DateTime.fromMillisecondsSinceEpoch(timestampRaw);
                       }
                       date ??= DateTime.now();
-                      
+
                       final isSelected = _selectedReports.contains(report['id']);
 
                       return DataRow(
@@ -1678,14 +1710,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 16),
-                            SwitchListTile(
-                              title: const Text('Email Notifications'),
-                              subtitle: const Text('Receive notifications via email'),
-                              value: true,
-                              onChanged: (value) {
+                            // SwitchListTile(
+                            //   title: const Text('Email Notifications'),
+                            //   subtitle: const Text('Receive notifications via email'),
+                            //   value: true,
+                            //   onChanged: (value) {
 
-                              },
-                            ),
+                            //   },
+                            // ),
                             SwitchListTile(
                               title: const Text('Push Notifications'),
                               subtitle: const Text('Receive push notifications'),

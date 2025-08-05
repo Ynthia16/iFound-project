@@ -7,15 +7,17 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 import '../utils/responsive_helper.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+
 
 /// Home screen with real-time match checking and notifications.
 class HomeScreen extends StatefulWidget {
   final void Function(int) onTabSelected;
   final void Function(int)? onNotificationCountChanged;
   final void Function(List<Map<String, dynamic>>)? onMatchesUpdated;
-  
+
   const HomeScreen({
-    super.key, 
+    super.key,
     required this.onTabSelected,
     this.onNotificationCountChanged,
     this.onMatchesUpdated,
@@ -153,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void _showNotifications(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isSmallScreen = ResponsiveHelper.isSmallScreen(context);
-    
+
     // Responsive sizing
     final modalHeight = isSmallScreen ? 0.8 : 0.7;
     final headerPadding = isSmallScreen ? 16.0 : 20.0;
@@ -169,7 +171,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final emptySubtitleFontSize = isSmallScreen ? 12.0 : 14.0;
     final itemPadding = isSmallScreen ? 12.0 : 16.0;
     final itemVerticalPadding = isSmallScreen ? 6.0 : 8.0;
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -186,7 +188,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             Container(
               padding: EdgeInsets.all(headerPadding),
               decoration: BoxDecoration(
-                color: isDark 
+                color: isDark
                   ? const Color(0xFF2196F3).withOpacity(0.15)
                   : const Color(0xFFE8F5E8),
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
@@ -196,13 +198,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   Container(
                     padding: EdgeInsets.all(isSmallScreen ? 6 : 8),
                     decoration: BoxDecoration(
-                      color: isDark 
+                      color: isDark
                         ? const Color(0xFF2196F3).withOpacity(0.2)
                         : Colors.green[100],
                       borderRadius: BorderRadius.circular(isSmallScreen ? 6 : 8),
                     ),
                     child: Icon(
-                      Icons.notifications_active_rounded, 
+                      Icons.notifications_active_rounded,
                       color: isDark ? const Color(0xFF2196F3) : Colors.green[700],
                       size: iconSize,
                     ),
@@ -286,7 +288,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: isDark 
+                                color: isDark
                                   ? Colors.black.withOpacity(0.2)
                                   : Colors.black.withOpacity(0.05),
                                 blurRadius: 4,
@@ -298,7 +300,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             leading: Container(
                               padding: EdgeInsets.all(isSmallScreen ? 6 : 8),
                               decoration: BoxDecoration(
-                                color: isDark 
+                                color: isDark
                                   ? const Color(0xFF2196F3).withOpacity(0.1)
                                   : Colors.green[100],
                                 borderRadius: BorderRadius.circular(isSmallScreen ? 6 : 8),
@@ -331,8 +333,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 Text(
                                   'Status: ${match['status'] ?? 'Unknown'}',
                                   style: TextStyle(
-                                    color: (match['status'] == 'found') 
-                                        ? Colors.green 
+                                    color: (match['status'] == 'found')
+                                        ? Colors.green
                                         : Colors.orange,
                                     fontWeight: FontWeight.w500,
                                     fontSize: itemSubtitleFontSize,
@@ -350,7 +352,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               // TODO: Navigate to match details
                             },
                             contentPadding: EdgeInsets.symmetric(
-                              horizontal: itemPadding, 
+                              horizontal: itemPadding,
                               vertical: itemVerticalPadding
                             ),
                           ),
@@ -376,7 +378,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           Navigator.pop(context);
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: isDark 
+                          backgroundColor: isDark
                             ? Colors.red.withOpacity(0.1)
                             : Colors.red[50],
                           foregroundColor: Colors.red[700],
@@ -409,7 +411,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return _isLoading
         ? _buildLoadingState()
         : FadeTransition(
@@ -418,7 +420,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               position: _slideAnimation,
               child: Container(
                 decoration: BoxDecoration(
-                  gradient: isDark 
+                  gradient: isDark
                     ? LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
@@ -497,7 +499,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final titleSize = isSmallScreen ? 16.0 : 18.0;
     final subtitleSize = isSmallScreen ? 12.0 : 14.0;
     final buttonSize = isSmallScreen ? 12.0 : 14.0;
-    
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -569,7 +571,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
                 Container(
                   padding: EdgeInsets.symmetric(
-                    horizontal: isSmallScreen ? 12 : 16, 
+                    horizontal: isSmallScreen ? 12 : 16,
                     vertical: isSmallScreen ? 6 : 8
                   ),
                   decoration: BoxDecoration(
@@ -599,7 +601,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 400;
     final buttonSpacing = isSmallScreen ? 12.0 : 16.0;
-    
+
     return Row(
       children: [
         Expanded(
@@ -766,16 +768,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final padding = isSmallScreen ? 16.0 : 20.0;
     final iconSize = isSmallScreen ? 20.0 : 24.0;
     final fontSize = isSmallScreen ? 16.0 : 18.0;
-    
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: padding, vertical: isSmallScreen ? 12 : 16),
       decoration: BoxDecoration(
-        color: isDark 
+        color: isDark
           ? const Color(0xFF2A2A2A)
           : Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isDark 
+          color: isDark
             ? const Color(0xFF404040)
             : Colors.grey[200]!,
           width: 1,
@@ -815,7 +817,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
           Container(
             decoration: BoxDecoration(
-              color: isDark 
+              color: isDark
                 ? const Color(0xFF404040)
                 : Colors.grey[100],
               borderRadius: BorderRadius.circular(16),
@@ -852,7 +854,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: isDark 
+                    color: isDark
                       ? const Color(0xFF2A2A2A)
                       : Colors.white,
                     borderRadius: BorderRadius.circular(20),
@@ -881,13 +883,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           );
         }
-        
+
         if (snapshot.hasError) {
           return Center(
             child: Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: isDark 
+                color: isDark
                   ? const Color(0xFF2A2A2A)
                   : Colors.white,
                 borderRadius: BorderRadius.circular(20),
@@ -949,13 +951,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           );
         }
-        
+
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
           return Center(
             child: Container(
               padding: const EdgeInsets.all(32),
               decoration: BoxDecoration(
-                color: isDark 
+                color: isDark
                   ? const Color(0xFF2A2A2A)
                   : Colors.white,
                 borderRadius: BorderRadius.circular(20),
@@ -1052,11 +1054,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       },
     );
   }
-  
+
   String _getTimeAgo(DateTime dateTime) {
     final now = DateTime.now();
     final difference = now.difference(dateTime);
-    
+
     if (difference.inDays > 0) {
       return '${difference.inDays}d ago';
     } else if (difference.inHours > 0) {

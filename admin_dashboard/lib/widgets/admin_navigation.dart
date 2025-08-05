@@ -16,7 +16,7 @@ class AdminNavigation extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 768;
     final sidebarWidth = isSmallScreen ? 200.0 : 250.0;
-    
+
     return Container(
       width: sidebarWidth,
       decoration: BoxDecoration(
@@ -31,23 +31,26 @@ class AdminNavigation extends StatelessWidget {
         children: [
           // Logo Section
           Container(
-            padding: EdgeInsets.all(isSmallScreen ? 12.0 : 16.0),
+            padding: EdgeInsets.all(isSmallScreen ? 14.0 : 18.0),
             child: Row(
               children: [
-                SvgPicture.asset(
-                  'assets/images/ifound_logo.svg',
-                  height: isSmallScreen ? 24 : 28,
-                  width: isSmallScreen ? 24 : 28,
-                  colorFilter: ColorFilter.mode(
-                    Theme.of(context).colorScheme.primary,
-                    BlendMode.srcIn,
+                Transform.scale(
+                  scale: 2.2,
+                  child: SvgPicture.asset(
+                    'assets/images/ifound_logo.svg',
+                    height: isSmallScreen ? 24 : 28,
+                    width: isSmallScreen ? 24 : 28,
+                    colorFilter: ColorFilter.mode(
+                      Theme.of(context).colorScheme.primary,
+                      BlendMode.srcIn,
+                    ),
                   ),
                 ),
               ],
             ),
           ),
           const Divider(),
-          
+
           // Navigation Items
           Expanded(
             child: ListView(
@@ -105,7 +108,7 @@ class AdminNavigation extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Footer
           Container(
             padding: EdgeInsets.all(isSmallScreen ? 12.0 : 16.0),
@@ -136,7 +139,7 @@ class AdminNavigation extends StatelessWidget {
     required bool isSmallScreen,
   }) {
     final isSelected = selectedIndex == index;
-    
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
       child: ListTile(
@@ -164,4 +167,4 @@ class AdminNavigation extends StatelessWidget {
       ),
     );
   }
-} 
+}

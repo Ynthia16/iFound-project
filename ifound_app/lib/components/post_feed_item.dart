@@ -20,7 +20,7 @@ class PostFeedItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isLost = status == 'lost';
-    
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
       decoration: BoxDecoration(
@@ -28,7 +28,7 @@ class PostFeedItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: isDark 
+            color: isDark
               ? Colors.black.withOpacity(0.2)
               : Colors.black.withOpacity(0.08),
             blurRadius: 12,
@@ -52,13 +52,13 @@ class PostFeedItem extends StatelessWidget {
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
-                    color: isLost 
+                    color: isLost
                       ? Colors.red.withOpacity(isDark ? 0.2 : 0.1)
                       : Colors.green.withOpacity(isDark ? 0.2 : 0.1),
                     borderRadius: BorderRadius.circular(28),
                   ),
                   child: Icon(
-                    isLost ? Icons.search_rounded : Icons.check_circle_rounded,
+                    isLost ? Icons.task_alt : Icons.check_circle_rounded,
                     color: isLost ? Colors.red[400] : Colors.green[400],
                     size: 28,
                   ),
@@ -124,4 +124,4 @@ class PostFeedItem extends StatelessWidget {
       ),
     );
   }
-} 
+}

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 class IFoundLogo extends StatelessWidget {
   final double size;
@@ -6,6 +7,7 @@ class IFoundLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
     return Container(
       width: size,
       height: size,
@@ -14,10 +16,12 @@ class IFoundLogo extends StatelessWidget {
         borderRadius: BorderRadius.circular(size / 2),
       ),
       child: Icon(
-        Icons.search_rounded,
+        MdiIcons.fileCheckOutline,
+        //  MdiIcons.alertCircleOutline,
         color: Colors.white,
         size: size * 0.6,
       ),
     );
   }
-} 
+}
+

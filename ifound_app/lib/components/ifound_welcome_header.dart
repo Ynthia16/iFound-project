@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+
 
 class IFoundWelcomeHeader extends StatelessWidget {
   final String name;
@@ -9,7 +11,7 @@ class IFoundWelcomeHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -17,7 +19,7 @@ class IFoundWelcomeHeader extends StatelessWidget {
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: isDark 
+            color: isDark
               ? const Color(0xFF2196F3).withOpacity(0.2)
               : const Color(0xFFE3F2FD),
             borderRadius: BorderRadius.circular(24),
@@ -26,9 +28,9 @@ class IFoundWelcomeHeader extends StatelessWidget {
               width: 2,
             ),
           ),
-          child: Icon(
-            Icons.search_rounded,
-            color: const Color(0xFF2196F3),
+         child: Icon(
+            MdiIcons.fileCheckOutline,
+            color: Colors.white,
             size: 24,
           ),
         ),
@@ -46,4 +48,4 @@ class IFoundWelcomeHeader extends StatelessWidget {
       ],
     );
   }
-} 
+}

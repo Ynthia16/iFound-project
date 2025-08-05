@@ -10,6 +10,7 @@ import 'feedback_screen.dart';
 import 'settings_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../utils/responsive_helper.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 /// Main navigation shell with bottom navigation bar.
 class MainShell extends StatefulWidget {
@@ -107,7 +108,7 @@ class _MainShellState extends State<MainShell> {
 
   void _showNotifications(BuildContext context) {
     final isSmallScreen = ResponsiveHelper.isSmallScreen(context);
-    
+
     // Responsive sizing
     final modalHeight = isSmallScreen ? 0.9 : 0.85;
     final headerPadding = isSmallScreen ? 16.0 : 24.0;
@@ -263,7 +264,7 @@ class _MainShellState extends State<MainShell> {
                                 borderRadius: BorderRadius.circular(isSmallScreen ? 8 : 12),
                               ),
                               child: Icon(
-                                Icons.arrow_forward_ios, 
+                                Icons.arrow_forward_ios,
                                 size: isSmallScreen ? 16 : 20
                               ),
                             ),
@@ -400,10 +401,11 @@ class _MainShellState extends State<MainShell> {
                 color: const Color(0xFF2196F3).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(
-                Icons.search_rounded,
-                color: Color(0xFF2196F3),
-                size: 20,
+              child: Icon(
+                MdiIcons.fileCheckOutline,
+                //  MdiIcons.alertCircleOutline,
+                color: const Color.fromRGBO(33, 150, 243, 1),
+                size: 28.0,
               ),
             ),
             const SizedBox(width: 12),
